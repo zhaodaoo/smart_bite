@@ -10,6 +10,7 @@ double currentLoadingTime = 5;
 class SerialPortsProvider extends ChangeNotifier {
   List<MySerialPort> _availablePorts = SerialPort.availablePorts.map((address)=>MySerialPort(address: address)).toList();
   double _loadingTime = currentLoadingTime;
+  List<String> orderNames = [];
 
   // Getter
   List<MySerialPort> get availablePorts => _availablePorts;
@@ -24,6 +25,7 @@ class SerialPortsProvider extends ChangeNotifier {
   Future<void> readFromPort(MySerialPort port) async{
     port.status = PortStatus.updating;
     notifyListeners();
+
     await port.read();
     notifyListeners();
   }
@@ -75,9 +77,9 @@ class MySerialPort {
   }
   
   void _onUpdating () {
-    final match = RegExp(r'(\d{2})(OK)([0-9A-F]{8})?', multiLine: true).firstMatch(_strBuffer);
-    
+    final match = RegExp(r'(\d{2})(OK)([0-9A-F]{8})?', multiLine: true, dotAll: true).firstMatch(_strBuffer);
     if (match != null) {
+      debugPrint('Dectected results DeviceID="${match[1]}", Status="${match[2]}", RFID="${match[3]}"');
       _id = match[1] ?? '--';
       status = match[2]=='OK'? PortStatus.ok:PortStatus.error;
       _rfid = match[3] ?? '';
@@ -116,14 +118,14 @@ class MySerialPort {
       } on SerialPortError catch (err, _) {
         _strBuffer = SerialPort.lastError.toString();
         port.close();
-
+        await Future.delayed(const Duration(seconds: 1));
         _onError();
         debugPrint('[$address][error] $_strBuffer');
       }
       
     } else {
       port.close();
-
+      await Future.delayed(const Duration(seconds: 1));
       _onInit();
       debugPrint('[$address][error] Failed to open the port.');
     }
