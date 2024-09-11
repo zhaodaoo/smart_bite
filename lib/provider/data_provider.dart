@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:smart_bite/data/comments.dart';
 import 'package:smart_bite/data/constant.dart';
+import 'package:smart_bite/data/dailyneeds_for_sixteen_above.dart';
 import 'package:smart_bite/data/dishes_info.dart';
-import 'package:smart_bite/data/under_fifteen_dailyneeds.dart';
+import 'package:smart_bite/data/dailyneeds_for_under_fifteen.dart';
 
 
 class DataProvider extends ChangeNotifier {
@@ -107,24 +108,33 @@ class DataProvider extends ChangeNotifier {
   
   void analyze() {
 
-    // Needed nutririons
-    Map<NutritionType, double> todayNeeds = underFifteenFood[_sex]![_age]![_activityLevel]!;
-    Map<NutritionType, double> thisMealNeeds = todayNeeds.map((key, value) => MapEntry(key, value*mealProportion[_meal]!));
-    debugPrint('todayNeeds = $todayNeeds');
-    debugPrint('thisMealNeeds = $thisMealNeeds');
-
     // Intake meal nutririon
     List<Map<NutritionType, double>?> eachMealNutrition =  orderNames.map((name) => dishesInfo[name]).toList();
     Map<NutritionType, double> intakeTotalNutrition = {};
     intakeTotalNutrition.addEntries(NutritionType.values.map((key) => MapEntry(key, eachMealNutrition.map((meal) => meal![key]).fold(0.0, (previousValue, element) => previousValue + element!))));
     debugPrint('intakeTotalNutrition = $intakeTotalNutrition');
 
+    if ([Age.zeroToNine, Age.tenToTwelve, Age.thirteenToFifteen].contains(_age)) {
+      // Needed nutririons
+      Map<NutritionType, double> todayNeeds = dailyNeedsForUnderFifteen[_sex]![_age]![_activityLevel]!;
+      debugPrint('todayNeeds = $todayNeeds');
 
-    // Needed Result
-    _neededCalariePerDay = todayNeeds[NutritionType.calorie]!.round();
-    _neededCalarieThisMeal = thisMealNeeds[NutritionType.calorie]!.round();
-    _intakeFoodTypeDailyProportion = intakeFoodTypeDailyProportion.map((key, _) => MapEntry(key, intakeTotalNutrition[key]!/todayNeeds[key]!*100));
-    _intakeTotalNutritionWithoutFoddType = intakeTotalNutritionWithoutFoddType.map((key, _) => MapEntry(key, intakeTotalNutrition[key]!));
+      // Needed Result
+      _neededCalariePerDay = todayNeeds[NutritionType.calorie]!.round();
+      _neededCalarieThisMeal = (_neededCalariePerDay * mealProportion[_meal]!).round();
+      _intakeFoodTypeDailyProportion = intakeFoodTypeDailyProportion.map((key, _) => MapEntry(key, intakeTotalNutrition[key]!/todayNeeds[key]!*100));
+      _intakeTotalNutritionWithoutFoddType = intakeTotalNutritionWithoutFoddType.map((key, _) => MapEntry(key, intakeTotalNutrition[key]!));
+    } else {
+      _neededCalariePerDay = dailyCalorieNeedsForAboveSixteen[_sex]![_age]![_activityLevel]!;
+      _neededCalarieThisMeal = (_neededCalariePerDay * mealProportion[_meal]!).round();
+      Map<NutritionType, double> todayNeededFoodType = dailyFoodTypeNeedsForAboveSixteen[(_neededCalariePerDay/100).floor()*100]!;
+
+      // Needed Result
+      _intakeFoodTypeDailyProportion = intakeFoodTypeDailyProportion.map((key, _) => MapEntry(key, intakeTotalNutrition[key]!/todayNeededFoodType[key]!*100));
+      _intakeTotalNutritionWithoutFoddType = intakeTotalNutritionWithoutFoddType.map((key, _) => MapEntry(key, intakeTotalNutrition[key]!));
+      
+    }
+    
     debugPrint('neededCalariePerDay = $_neededCalariePerDay');
     debugPrint('neededCalarieThisMeal = $_neededCalarieThisMeal');
     debugPrint('intakeFoodTypeDailyProportion = $_intakeFoodTypeDailyProportion');

@@ -1,6 +1,6 @@
 import 'package:smart_bite/data/constant.dart';
 
-const Map<Sex, Map<Age, Map<ActivityLevel, Map<NutritionType, double>>>> underFifteenFood = {
+const Map<Sex, Map<Age, Map<ActivityLevel, Map<NutritionType, double>>>> dailyNeedsForUnderFifteen = {
   Sex.male:{
     Age.zeroToNine:{
       ActivityLevel.slightlyLow: {
@@ -126,5 +126,3 @@ const Map<Sex, Map<Age, Map<ActivityLevel, Map<NutritionType, double>>>> underFi
     },
   },
  };
-
-
