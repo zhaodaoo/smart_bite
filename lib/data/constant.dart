@@ -2,6 +2,14 @@ enum Meal {breakfast, lunch, dinnder}
 enum ActivityLevel {low, slightlyLow, miderate, high}
 enum Sex {female, male}
 enum Age {zeroToNine, tenToTwelve, thirteenToFifteen, sixteenToEighteen, ninteenToThirty, thirtyOneToFifty, fiftyOneToSeventy, seventyOneToOneTwelve}
+enum NutritionType {grains, meat, dairy, vegetables, fruits, oils, calorie, carb, protein, fat, na, ca, fiber}
+enum Rank {good, tooMuch, tooLess}
+
+const Map<Meal,double> mealProportion = {
+  Meal.breakfast: 0.2,
+  Meal.lunch: 0.4,
+  Meal.dinnder: 0.4,
+};
 
 String getMealLabel (Meal value) {
     return switch (value) {

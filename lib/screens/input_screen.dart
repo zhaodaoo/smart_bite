@@ -118,7 +118,6 @@ class _InputScreenState extends State<InputScreen> {
                   });
                 },
                 onSubmit: () {
-                  
                 },
               )
             },
@@ -157,7 +156,7 @@ class ConfirmPage extends StatelessWidget {
                     Meal.lunch => Icons.lunch_dining,
                     Meal.dinnder => Icons.dinner_dining,
                   },
-                  title: provider.mealLabel, 
+                  title: getMealLabel(provider.meal), 
                   subtitle: '這是哪一餐'
                 ),
                 InfoCard(
@@ -165,17 +164,17 @@ class ConfirmPage extends StatelessWidget {
                     Sex.female => Icons.female,
                     Sex.male => Icons.male,
                   },
-                  title: provider.sexLabel, 
+                  title: getSexLabel(provider.sex), 
                   subtitle: '性別'
                 ),
                 InfoCard(
                   icon: Icons.numbers,
-                  title: provider.ageLabel, 
+                  title: getAgeLabel(provider.age), 
                   subtitle: '年齡'
                 ),
                 InfoCard(
                   icon: Icons.directions_run,
-                  title: provider.activityLevelLabel, 
+                  title: getActivityLevelLabel(provider.activityLevel), 
                   subtitle: '生活活動強度'
                 ),
               ];
@@ -212,8 +211,11 @@ class ConfirmPage extends StatelessWidget {
               label: '返回',
             ),
             MySubmitButton(
-              onPressed: onSubmit,
-              label: '確認',
+              onPressed: () {
+                context.read<DataProvider>().analyze();
+                onSubmit();
+              },
+              label: '分析',
             )
           ],
         )
@@ -233,16 +235,15 @@ class OrderPage extends StatelessWidget {
     List<OrderCard> getSerialStatusCards = context.select<SerialPortsProvider, List<OrderCard>>(
       (provider) {
         provider.orderNames.clear();
-        List<MySerialPort> availableRFID = provider.availablePorts.toList();
+        List<MySerialPort> availableRFID = provider.availablePorts.where((port)=>port.rfid!='').toList();
         return availableRFID.isNotEmpty
         ? List<OrderCard>.generate(
           availableRFID.length,
           (index) {
             debugPrint('Processing Widget DeviceID=${availableRFID[index].deviceId}');
             String mealId = availableRFID[index].rfid;
-            String mealName = idToMealName.containsKey(mealId)? idToMealName[mealId] ?? '黑暗料理' : '未知料理';
+            String mealName = idToMealName.containsKey(mealId)? (idToMealName[mealId] ?? '黑暗料理') : '未知料理';
             provider.orderNames.add(mealName);
-            debugPrint('RFID is not empty so a OderCard is returned.');
             return OrderCard(
               status: availableRFID[index].status,
               mealName: mealName,
