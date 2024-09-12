@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import 'package:smart_bite/data/constant.dart';
 import 'package:smart_bite/data/id_to_meal.dart';
 import 'package:smart_bite/provider/data_provider.dart';
 import 'package:smart_bite/provider/serial_provider.dart';
 
-enum Page {homePage, mealPage, activityLevelPage, agePage, sexPage, orderPage, confirmPage}
+enum Page {homePage, mealPage, activityLevelPage, agePage, sexPage, orderPage, confirmPage, analyzingPage, printingPage, initialingPage}
 
 class InputScreen extends StatefulWidget {
   const InputScreen({super.key});
@@ -117,13 +118,58 @@ class _InputScreenState extends State<InputScreen> {
                     _currentPage = Page.orderPage;
                   });
                 },
-                onSubmit: () {
+                onSubmit: () async{
+                  setState(() {
+                    _currentPage = Page.analyzingPage;
+                  });
+                  await context.read<DataProvider>().analyze();
+                  
+                  setState(() {
+                    _currentPage = Page.printingPage;
+                  });
+                  await Future.delayed(const Duration(seconds: 1));
+                  // ignore: use_build_context_synchronously
+                  await context.read<DataProvider>().printing();
+                  
+                  setState(() {
+                    _currentPage = Page.initialingPage;
+                  });
+                  await Future.delayed(const Duration(seconds: 1));
+                  // ignore: use_build_context_synchronously
+                  await context.read<DataProvider>().initialize();
+
+                  await Future.delayed(const Duration(seconds: 1));
+                  setState(() {
+                    _currentPage = Page.homePage;
+                  });
                 },
-              )
+              ),
+              Page.analyzingPage => const LoadingPage('分析中'),
+              Page.printingPage => const LoadingPage('列印中'),
+              Page.initialingPage => const LoadingPage('初始化中'),
             },
           ),
         )
       ),
+    );
+  }
+}
+
+class LoadingPage extends StatelessWidget {
+  final String hint;
+
+  const LoadingPage(this.hint, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.max,
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        MyHeadLine(hint),
+        const SizedBox(width: 880, child: LinearProgressIndicator()),
+      ],
     );
   }
 }
@@ -211,10 +257,7 @@ class ConfirmPage extends StatelessWidget {
               label: '返回',
             ),
             MySubmitButton(
-              onPressed: () {
-                context.read<DataProvider>().analyze();
-                onSubmit();
-              },
+              onPressed: onSubmit,
               label: '分析',
             )
           ],

@@ -1,4 +1,9 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+
 import 'package:smart_bite/data/comments.dart';
 import 'package:smart_bite/data/constant.dart';
 import 'package:smart_bite/data/dailyneeds_for_sixteen_above.dart';
@@ -106,8 +111,7 @@ class DataProvider extends ChangeNotifier {
     });
   }
   
-  void analyze() {
-
+  Future<void> analyze() async{
     // Intake meal nutririon
     List<Map<NutritionType, double>?> eachMealNutrition =  orderNames.map((name) => dishesInfo[name]).toList();
     Map<NutritionType, double> intakeTotalNutrition = {};
@@ -147,6 +151,73 @@ class DataProvider extends ChangeNotifier {
     debugPrint('commentsByFoodType = $_commentsByFoodType');
   }
 
+  Future<Uint8List> _generatePdf(PdfPageFormat format, String title) async {
+    final pdf = pw.Document(version: PdfVersion.pdf_1_5, compress: true);
 
+    pdf.addPage(
+      pw.Page(
+        pageFormat: format,
+        build: (context) {
+          return pw.Column(
+            children: [
+              pw.SizedBox(
+                width: double.infinity,
+                child: pw.FittedBox(
+                  child: pw.Text(title),
+                ),
+              ),
+              pw.SizedBox(height: 20),
+              pw.Flexible(child: pw.FlutterLogo()),
+            ],
+          );
+        },
+      ),
+    );
 
+    return pdf.save();
+  }
+
+  Future<void> printing() async{
+  }
+
+  Future<void> initialize() async{
+    _meal = Meal.lunch;
+    _activityLevel = ActivityLevel.miderate;
+    _sex = Sex.female;
+    _age = Age.zeroToNine;
+
+    orderNames = [];
+
+    // Needed analyze results
+    _neededCalariePerDay = 0;
+    _neededCalarieThisMeal = 0;
+    _intakeFoodTypeDailyProportion = {
+      NutritionType.grains: 0,
+      NutritionType.meat: 0,
+      NutritionType.vegetables: 0,
+      NutritionType.fruits: 0,
+      NutritionType.oils: 0,
+      NutritionType.dairy: 0,
+    };
+    _intakeTotalNutritionWithoutFoddType = {
+      NutritionType.calorie: 0,
+      NutritionType.carb: 0,
+      NutritionType.protein: 0,
+      NutritionType.fat: 0,
+      NutritionType.na: 0,
+      NutritionType.ca: 0,
+      NutritionType.fiber: 0,
+    };
+
+    // Needed comments
+    _overallComment = '';
+    _commentsByFoodType = {
+      NutritionType.grains: '',
+      NutritionType.meat: '',
+      NutritionType.vegetables: '',
+      NutritionType.fruits: '',
+      NutritionType.oils: '',
+      NutritionType.dairy: '',
+    };
+  }
 }
