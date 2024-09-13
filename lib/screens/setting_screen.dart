@@ -1,7 +1,11 @@
 
 import 'package:flutter/material.dart';
+import 'package:pdf/pdf.dart';
+import 'package:printing/printing.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_bite/provider/data_provider.dart';
 import 'package:smart_bite/provider/serial_provider.dart';
+import 'package:pdf/widgets.dart' as pw;
 
 class SettingPage extends StatelessWidget {
   const SettingPage({super.key});
@@ -20,6 +24,22 @@ class SettingPage extends StatelessWidget {
           ),
         );
       }
+    );
+    final pdf = pw.Document();
+    pdf.addPage(
+      pw.Page(
+        pageFormat: PdfPageFormat.a4.landscape.copyWith(
+          marginBottom: 0.3 * PdfPageFormat.cm,
+          marginLeft: 0.3 * PdfPageFormat.cm,
+          marginRight: 0.3 * PdfPageFormat.cm,
+          marginTop: 0.3 * PdfPageFormat.cm
+        ),
+        build: (context) {
+          return pw.Center(
+            child: pw.Text('Test'),
+          );
+        },
+      ),
     );
     return Scaffold(
       appBar: AppBar(
@@ -77,14 +97,57 @@ class SettingPage extends StatelessWidget {
                 ],
               ),
             ),
-            const Expanded(child: Placeholder())
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    TextFormField(
+                      initialValue: context.read<DataProvider>().printerName,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: 'Printer Name',
+                      ),
+                      onFieldSubmitted:(value) {
+                        context.read<DataProvider>().printerName = value;
+                        debugPrint('Printer Name = ${context.read<DataProvider>().printerName}');
+                      },
+                    ),
+                    Text('Current Printer Name: ${context.select<DataProvider, String>((provider) => provider.printerName)}'),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+                      child: FilledButton.icon(
+                        onPressed: () async{
+                          await Printing.directPrintPdf ( 
+                            printer: Printer(url: context.read<DataProvider>().printerName), 
+                            format: PdfPageFormat.a4.landscape,
+                            onLayout: (format) => context.read<DataProvider>().generatePdf(format)
+                          );
+                        },
+                        icon: const Icon(Icons.print),
+                        label: const Text("Print Test Page"),
+                      ),
+                    ),
+                    // Padding(
+                    //   padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+                    //   child: FilledButton.icon(
+                    //     onPressed: ()async => Navigator.of(context).push(MaterialPageRoute(builder: (context) => const SettingPage())),
+                    //     icon: const Icon(Icons.print),
+                    //     label: const Text("Printing Preview"),
+                    //   ),
+                    // )
+                  ],
+                ),
+              )
+            )
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: ()async => await serialPortsProvider.updatePorts(),
-        child: const Icon(Icons.refresh),
-      ),
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: ()async => await serialPortsProvider.updatePorts(),
+      //   child: const Icon(Icons.refresh),
+      // ),
     );
   }
 }

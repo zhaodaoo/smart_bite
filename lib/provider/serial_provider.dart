@@ -5,7 +5,7 @@ import 'package:flutter_libserialport/flutter_libserialport.dart';
 
 enum PortStatus {init, updating, ok, error}
 
-double currentLoadingTime = 5;
+double currentLoadingTime = 8;
 
 class SerialPortsProvider extends ChangeNotifier {
   List<MySerialPort> _availablePorts = SerialPort.availablePorts.map((address)=>MySerialPort(address: address)).toList();

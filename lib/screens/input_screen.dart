@@ -5,6 +5,10 @@ import 'package:smart_bite/data/constant.dart';
 import 'package:smart_bite/data/id_to_meal.dart';
 import 'package:smart_bite/provider/data_provider.dart';
 import 'package:smart_bite/provider/serial_provider.dart';
+import 'package:smart_bite/screens/setting_screen.dart';
+
+import 'package:pdf/pdf.dart';
+import 'package:printing/printing.dart';
 
 enum Page {homePage, mealPage, activityLevelPage, agePage, sexPage, orderPage, confirmPage, analyzingPage, printingPage, initialingPage}
 
@@ -123,22 +127,26 @@ class _InputScreenState extends State<InputScreen> {
                     _currentPage = Page.analyzingPage;
                   });
                   await context.read<DataProvider>().analyze();
-                  
+                  // ignore: use_build_context_synchronously
+                  Printing.directPrintPdf ( 
+                    // ignore: use_build_context_synchronously
+                    printer: Printer(url: context.read<DataProvider>().printerName), 
+                    format: PdfPageFormat.a4.landscape,
+                    onLayout: (format) => context.read<DataProvider>().generatePdf(format)
+                  );
+                  await Future.delayed(const Duration(seconds: 3));
+
                   setState(() {
                     _currentPage = Page.printingPage;
                   });
-                  await Future.delayed(const Duration(seconds: 1));
-                  // ignore: use_build_context_synchronously
-                  await context.read<DataProvider>().printing();
+                  await Future.delayed(const Duration(seconds: 20));
                   
                   setState(() {
                     _currentPage = Page.initialingPage;
                   });
-                  await Future.delayed(const Duration(seconds: 1));
                   // ignore: use_build_context_synchronously
                   await context.read<DataProvider>().initialize();
-
-                  await Future.delayed(const Duration(seconds: 1));
+                  await Future.delayed(const Duration(seconds: 2));
                   setState(() {
                     _currentPage = Page.homePage;
                   });
@@ -150,6 +158,16 @@ class _InputScreenState extends State<InputScreen> {
             },
           ),
         )
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.of(context).push(MaterialPageRoute(builder: (context) => const SettingPage()));
+        },
+        backgroundColor: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.1),
+        child: Icon(
+          Icons.settings,
+          color: Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.3),
+        ),
       ),
     );
   }
