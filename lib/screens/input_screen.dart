@@ -142,7 +142,7 @@ class _InputScreenState extends State<InputScreen> {
                   setState(() {
                     _currentPage = Page.printingPage;
                   });
-                  await Future.delayed(const Duration(seconds: 20));
+                  await Future.delayed(const Duration(seconds: 25));
                   
                   setState(() {
                     _currentPage = Page.initialingPage;

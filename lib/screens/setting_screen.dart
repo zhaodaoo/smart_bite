@@ -5,7 +5,6 @@ import 'package:printing/printing.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_bite/provider/data_provider.dart';
 import 'package:smart_bite/provider/serial_provider.dart';
-import 'package:pdf/widgets.dart' as pw;
 
 class SettingPage extends StatelessWidget {
   const SettingPage({super.key});
@@ -25,22 +24,7 @@ class SettingPage extends StatelessWidget {
         );
       }
     );
-    final pdf = pw.Document();
-    pdf.addPage(
-      pw.Page(
-        pageFormat: PdfPageFormat.a4.landscape.copyWith(
-          marginBottom: 0.3 * PdfPageFormat.cm,
-          marginLeft: 0.3 * PdfPageFormat.cm,
-          marginRight: 0.3 * PdfPageFormat.cm,
-          marginTop: 0.3 * PdfPageFormat.cm
-        ),
-        build: (context) {
-          return pw.Center(
-            child: pw.Text('Test'),
-          );
-        },
-      ),
-    );
+
     return Scaffold(
       appBar: AppBar(
         title: Center(child: Text('Settings', style: Theme.of(context).textTheme.headlineLarge)),
@@ -61,9 +45,9 @@ class SettingPage extends StatelessWidget {
                         padding: const EdgeInsets.fromLTRB(40, 0, 40, 0),
                         child: Slider(
                           value: serialPortsProvider.loadingTime,
-                          max: 10,
+                          max: 20,
                           min: 3,
-                          divisions: 7,
+                          divisions: 17,
                           label: serialPortsProvider.loadingTime.round().toString(),
                           onChanged: (double value) {
                               serialPortsProvider.loadingTime = value;
