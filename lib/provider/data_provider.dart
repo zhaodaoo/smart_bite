@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:screenshot/screenshot.dart';
+import 'package:path_provider/path_provider.dart';
 
 import 'package:smart_bite/data/comments.dart';
 import 'package:smart_bite/data/constant.dart';
@@ -12,7 +15,7 @@ import 'package:smart_bite/data/dailyneeds_for_under_fifteen.dart';
 
 
 class DataProvider extends ChangeNotifier {
-  String _printerName = 'Brother DCP-T420W Printer';
+  String _printerName = 'Brother DCP-T426W';
   Meal _meal = Meal.lunch;
   ActivityLevel _activityLevel = ActivityLevel.miderate;
   Sex _sex = Sex.female;
@@ -586,8 +589,35 @@ class DataProvider extends ChangeNotifier {
       NutritionType.dairy: '',
     };
   }
-}
 
+  Future<String> get _localPath async {
+    final directory = await getApplicationDocumentsDirectory();
+
+    return directory.path;
+  }
+
+  Future<File> get _localFile async {
+    final path = await _localPath;
+    debugPrint('Data will be saved under "$path"');
+    return File('$path/data.csv');
+  }
+
+  Future<void> saveData() async {
+    final file = await _localFile;
+    var dateUtc = DateTime.now().toUtc();
+    var dateLocal = dateUtc.toLocal();
+    String outputString =
+        '$dateLocal, ${getAgeLabel(_age)}, ${getSexLabel(_sex)}, ${getActivityLevelLabel(_activityLevel)}, ${orderNames.join(',')}, "$_overallComment", "$_intakeFoodType", "$_intakeFoodTypeDailyProportion", "$_ranksByFoodType"\r\n';
+    debugPrint('outputString = $outputString');
+    if (await file.exists()) {
+      file.writeAsString(outputString, mode: FileMode.append);
+    } else {
+      file.writeAsString(outputString);
+    }
+     file.writeAsString(Platform.lineTerminator, mode: FileMode.append);
+  }
+
+}
 
 class NormalPrintingText extends StatelessWidget {
   final String text;

@@ -127,6 +127,7 @@ class _InputScreenState extends State<InputScreen> {
                     _currentPage = Page.analyzingPage;
                   });
                   await context.read<DataProvider>().analyze();
+
                   // ignore: use_build_context_synchronously
                   Printing.directPrintPdf ( 
                     // ignore: use_build_context_synchronously
@@ -134,8 +135,10 @@ class _InputScreenState extends State<InputScreen> {
                     format: PdfPageFormat.a4.landscape,
                     onLayout: (format) => context.read<DataProvider>().generatePdf(format)
                   );
+                  
+                  // ignore: use_build_context_synchronously
+                  await context.read<DataProvider>().saveData();
                   await Future.delayed(const Duration(seconds: 3));
-
                   setState(() {
                     _currentPage = Page.printingPage;
                   });
