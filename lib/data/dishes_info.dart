@@ -61,7 +61,7 @@ Map<String, Map<NutritionType, double>> dishesInfo = {
     NutritionType.ca: 2.4,
     NutritionType.fiber: 0.1
   },
-  "保久乳": {
+  "牛奶": {
     NutritionType.grains: 0,
     NutritionType.meat: 0,
     NutritionType.vegetables: 0,
@@ -271,7 +271,7 @@ Map<String, Map<NutritionType, double>> dishesInfo = {
     NutritionType.ca: 4,
     NutritionType.fiber: 2
   },
-  "紅豆飯湯": {
+  "高屏溪飯湯": {
     NutritionType.grains: 0.9,
     NutritionType.meat: 0.9,
     NutritionType.vegetables: 0,
@@ -1141,7 +1141,7 @@ Map<String, Map<NutritionType, double>> dishesInfo = {
     NutritionType.ca: 25.7,
     NutritionType.fiber: 2
   },
-  "紅麴豆腐鮮魚（第六屆大賽）": {
+  "紅麴豆腐鮮魚": {
     NutritionType.grains: 0,
     NutritionType.meat: 2,
     NutritionType.vegetables: 0.3,
@@ -1156,7 +1156,7 @@ Map<String, Map<NutritionType, double>> dishesInfo = {
     NutritionType.ca: 43.9,
     NutritionType.fiber: 0.5
   },
-  "珠蔥烘蛋（第六屆大賽）": {
+  "珠蔥烘蛋": {
     NutritionType.grains: 0,
     NutritionType.meat: 1.3,
     NutritionType.vegetables: 0.2,
@@ -1171,7 +1171,7 @@ Map<String, Map<NutritionType, double>> dishesInfo = {
     NutritionType.ca: 55.5,
     NutritionType.fiber: 0.3
   },
-  "紅糟五花肉（第六屆大賽）": {
+  "紅糟五花肉": {
     NutritionType.grains: 0.13,
     NutritionType.meat: 1.2,
     NutritionType.vegetables: 0,
@@ -1186,7 +1186,7 @@ Map<String, Map<NutritionType, double>> dishesInfo = {
     NutritionType.ca: 4.3,
     NutritionType.fiber: 0
   },
-  "翠炒白菜（第五屆大賽）": {
+  "翠炒白菜": {
     NutritionType.grains: 0,
     NutritionType.meat: 0.4,
     NutritionType.vegetables: 0.6,
@@ -1201,7 +1201,7 @@ Map<String, Map<NutritionType, double>> dishesInfo = {
     NutritionType.ca: 53.9,
     NutritionType.fiber: 0.8
   },
-  "番茄炒蛋（第五屆大賽）": {
+  "番茄炒蛋": {
     NutritionType.grains: 0,
     NutritionType.meat: 0.9,
     NutritionType.vegetables: 0.7,
@@ -1216,7 +1216,7 @@ Map<String, Map<NutritionType, double>> dishesInfo = {
     NutritionType.ca: 32.9,
     NutritionType.fiber: 0.6
   },
-  "蒜香五色鮮蔬（第四屆大賽）": {
+  "蒜香五色鮮蔬": {
     NutritionType.grains: 0.075,
     NutritionType.meat: 0,
     NutritionType.vegetables: 0.6,
@@ -1231,7 +1231,7 @@ Map<String, Map<NutritionType, double>> dishesInfo = {
     NutritionType.ca: 15.7,
     NutritionType.fiber: 2.2
   },
-  "雙色花椰（第四屆大賽）": {
+  "雙色花椰": {
     NutritionType.grains: 0,
     NutritionType.meat: 0,
     NutritionType.vegetables: 0.8,
@@ -1246,7 +1246,7 @@ Map<String, Map<NutritionType, double>> dishesInfo = {
     NutritionType.ca: 23.5,
     NutritionType.fiber: 2.3
   },
-  "白飯一碗": {
+  "白飯": {
     NutritionType.grains: 1,
     NutritionType.meat: 0,
     NutritionType.vegetables: 0,
@@ -1291,7 +1291,7 @@ Map<String, Map<NutritionType, double>> dishesInfo = {
     NutritionType.ca: 12,
     NutritionType.fiber: 5
   },
-  "柳丁": {
+  "甜橙": {
     NutritionType.grains: 0,
     NutritionType.meat: 0,
     NutritionType.vegetables: 0,
@@ -1336,7 +1336,7 @@ Map<String, Map<NutritionType, double>> dishesInfo = {
     NutritionType.ca: 7.2,
     NutritionType.fiber: 2.4
   },
-  "豆漿": {
+  "國產豆漿": {
     NutritionType.grains: 0,
     NutritionType.meat: 1.3,
     NutritionType.vegetables: 0,
@@ -1351,22 +1351,7 @@ Map<String, Map<NutritionType, double>> dishesInfo = {
     NutritionType.ca: 29.9,
     NutritionType.fiber: 4.9
   },
-  "酥炸雞軟骨（90g）": {
-    NutritionType.grains: 0.25,
-    NutritionType.meat: 1.8,
-    NutritionType.vegetables: 0,
-    NutritionType.fruits: 0,
-    NutritionType.dairy: 0,
-    NutritionType.oils: 1.7,
-    NutritionType.calorie: 223.1,
-    NutritionType.carb: 18.2,
-    NutritionType.protein: 11.2,
-    NutritionType.fat: 11.5,
-    NutritionType.na: 302.2,
-    NutritionType.ca: 29.3,
-    NutritionType.fiber: 0.1
-  },
-  "酥炸杏鮑菇（裹粉漿，130g）": {
+  "酥炸杏鮑菇": {
     NutritionType.grains: 0.2,
     NutritionType.meat: 0.4,
     NutritionType.vegetables: 1,
@@ -1396,7 +1381,7 @@ Map<String, Map<NutritionType, double>> dishesInfo = {
     NutritionType.ca: 17,
     NutritionType.fiber: 0.2
   },
-  "香雞排（290g)": {
+  "炸雞排": {
     NutritionType.grains: 0.75,
     NutritionType.meat: 5,
     NutritionType.vegetables: 0,
@@ -1411,7 +1396,7 @@ Map<String, Map<NutritionType, double>> dishesInfo = {
     NutritionType.ca: 41.8,
     NutritionType.fiber: 0.3
   },
-  "珍奶中杯": {
+  "珍珠奶茶": {
     NutritionType.grains: 0.75,
     NutritionType.meat: 0,
     NutritionType.vegetables: 0,
@@ -1426,7 +1411,7 @@ Map<String, Map<NutritionType, double>> dishesInfo = {
     NutritionType.ca: 0,
     NutritionType.fiber: 0
   },
-  "鹹酥雞一份（150g）": {
+  "鹹酥雞": {
     NutritionType.grains: 0.375,
     NutritionType.meat: 3.3,
     NutritionType.vegetables: 0,
@@ -1456,7 +1441,7 @@ Map<String, Map<NutritionType, double>> dishesInfo = {
     NutritionType.ca: 6.4,
     NutritionType.fiber: 0.9
   },
-  "細薯條（中薯，100g）": {
+  "薯條": {
     NutritionType.grains: 0.75,
     NutritionType.meat: 0,
     NutritionType.vegetables: 0,
@@ -1471,7 +1456,7 @@ Map<String, Map<NutritionType, double>> dishesInfo = {
     NutritionType.ca: 0,
     NutritionType.fiber: 0
   },
-  "可樂(小杯)": {
+  "可樂": {
     NutritionType.grains: 0,
     NutritionType.meat: 0,
     NutritionType.vegetables: 0,
@@ -1486,7 +1471,7 @@ Map<String, Map<NutritionType, double>> dishesInfo = {
     NutritionType.ca: 0,
     NutritionType.fiber: 0
   },
-  "布丁(小,100g)": {
+  "布丁": {
     NutritionType.grains: 0,
     NutritionType.meat: 0,
     NutritionType.vegetables: 0,
@@ -1500,5 +1485,35 @@ Map<String, Map<NutritionType, double>> dishesInfo = {
     NutritionType.na: 50,
     NutritionType.ca: 0,
     NutritionType.fiber: 0
+  },
+  "小番茄": {
+    NutritionType.grains: 0,
+    NutritionType.meat: 0,
+    NutritionType.vegetables: 0,
+    NutritionType.fruits: 0.8,
+    NutritionType.dairy: 0,
+    NutritionType.oils: 0,
+    NutritionType.calorie: 65,
+    NutritionType.carb: 14.8,
+    NutritionType.protein: 1.8,
+    NutritionType.fat: 0.4,
+    NutritionType.na: 11.8,
+    NutritionType.ca: 27.2,
+    NutritionType.fiber: 3.3
+  },
+  "奇異果": {
+    NutritionType.grains: 0,
+    NutritionType.meat: 0,
+    NutritionType.vegetables: 0,
+    NutritionType.fruits: 1,
+    NutritionType.dairy: 0,
+    NutritionType.oils: 0,
+    NutritionType.calorie: 59.1,
+    NutritionType.carb: 14.7,
+    NutritionType.protein: 1.2,
+    NutritionType.fat: 0.3,
+    NutritionType.na: 3.1,
+    NutritionType.ca: 29,
+    NutritionType.fiber: 2.9
   }
 };
