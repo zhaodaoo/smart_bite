@@ -177,12 +177,16 @@ class _InputScreenState extends State<InputScreen> {
           Navigator.of(context).push(
               MaterialPageRoute(builder: (context) => const SettingPage()));
         },
-        backgroundColor:
-            Theme.of(context).colorScheme.primaryContainer.withOpacity(0.1),
+        backgroundColor: Theme.of(context)
+            .colorScheme
+            .primaryContainer
+            .withValues(alpha: .1),
         child: Icon(
           Icons.settings,
-          color:
-              Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.3),
+          color: Theme.of(context)
+              .colorScheme
+              .onPrimaryContainer
+              .withValues(alpha: 0.3),
         ),
       ),
     );

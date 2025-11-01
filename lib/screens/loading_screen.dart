@@ -4,8 +4,7 @@ class AnalyzingPage extends StatefulWidget {
   const AnalyzingPage({super.key});
 
   @override
-  State<AnalyzingPage> createState() =>
-      _AnalyzingPageState();
+  State<AnalyzingPage> createState() => _AnalyzingPageState();
 }
 
 class _AnalyzingPageState extends State<AnalyzingPage>
@@ -33,7 +32,8 @@ class _AnalyzingPageState extends State<AnalyzingPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.inverseSurface.withOpacity(0.8),
+      backgroundColor:
+          Theme.of(context).colorScheme.inverseSurface.withValues(alpha: 0.8),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 280),
@@ -71,8 +71,7 @@ class PrintingPage extends StatefulWidget {
   const PrintingPage({super.key});
 
   @override
-  State<PrintingPage> createState() =>
-      _PrintingPageState();
+  State<PrintingPage> createState() => _PrintingPageState();
 }
 
 class _PrintingPageState extends State<PrintingPage>
@@ -100,7 +99,8 @@ class _PrintingPageState extends State<PrintingPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.inverseSurface.withOpacity(0.9),
+      backgroundColor:
+          Theme.of(context).colorScheme.inverseSurface.withValues(alpha: 0.9),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 280),
@@ -151,7 +151,9 @@ class ResetingPage extends StatelessWidget {
                 padding: EdgeInsets.symmetric(horizontal: 0),
                 child: Image(image: AssetImage('assets/images/title.png')),
               ),
-              SizedBox(height: 16,),
+              SizedBox(
+                height: 16,
+              ),
               Padding(
                 padding: EdgeInsets.fromLTRB(0, 40, 0, 64),
                 child: Text(
