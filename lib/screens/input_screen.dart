@@ -138,14 +138,25 @@ class _InputScreenState extends State<InputScreen> {
                       });
                       await context.read<DataProvider>().analyze();
 
-                      // ignore: use_build_context_synchronously
+                      // Start Printing analysis result
                       Printing.directPrintPdf(
-                          // ignore: use_build_context_synchronously
                           printer: Printer(
+                              // ignore: use_build_context_synchronously
                               url: context.read<DataProvider>().printerName),
                           format: PdfPageFormat.a4.landscape,
-                          onLayout: (format) =>
-                              context.read<DataProvider>().generatePdf(format));
+                          onLayout: (format) => context
+                              .read<DataProvider>()
+                              .generateReportPdf(format));
+
+                      // Start printing label info page
+                      Printing.directPrintPdf(
+                          printer: Printer(
+                              // ignore: use_build_context_synchronously
+                              url: context.read<DataProvider>().printerName),
+                          format: PdfPageFormat.a4.landscape,
+                          onLayout: (format) => context
+                              .read<DataProvider>()
+                              .generateLabelPdf(format));
 
                       // ignore: use_build_context_synchronously
                       await context.read<DataProvider>().saveData();
@@ -156,6 +167,7 @@ class _InputScreenState extends State<InputScreen> {
                       await Future.delayed(const Duration(seconds: 25));
 
                       setState(() {
+                        // 進入初始化頁面
                         _currentPage = Page.initialingPage;
                       });
                       // ignore: use_build_context_synchronously

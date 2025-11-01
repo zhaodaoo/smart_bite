@@ -1,6 +1,6 @@
 import 'package:smart_bite/data/constant.dart';
 
-Map<String, Map<Label, String>> dishesInfo = {
+Map<String, Map<Label, String>> dishesLabel = {
   "雙薯搖滾蛋沙拉": {Label.type: '產銷履歷農產品', Label.food: '甘藷（地瓜）'},
   "鮮菇莧菜": {Label.type: '有機農產品', Label.food: '莧菜(含綠莧、白莧、紅莧)'},
   "葡萄": {Label.type: '溯源農糧產品', Label.food: '葡萄'},

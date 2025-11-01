@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
       home: Scaffold(
         appBar: AppBar(title: Text(title)),
         body: PdfPreview(
-          build: (format) => _generatePdf(format),
+          build: (format) => _generateMockLabelPdf(format),
           initialPageFormat: PdfPageFormat.a4.landscape,
           dpi: 300,
         ),
@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
     );
   }
 
-  Future<Uint8List> _generatePdf(PdfPageFormat format) async {
+  Future<Uint8List> _generateMockReportPdf(PdfPageFormat format) async {
     Widget myContainer = Container(
       decoration: const BoxDecoration(
         image: DecorationImage(
@@ -45,7 +45,7 @@ class MyApp extends StatelessWidget {
           SizedBox(
             height: 100,
             child: Container(
-              color: Colors.blue.withValues(alpha: 0.0),
+              color: Colors.blue.withValues(alpha: 0.5),
             ),
           ),
           Row(
@@ -55,7 +55,7 @@ class MyApp extends StatelessWidget {
                 width: 480,
                 height: 64,
                 child: Container(
-                  color: Colors.blue.withValues(alpha: 0.0),
+                  color: Colors.blue.withValues(alpha: 0.5),
                 ),
               ),
               Column(
@@ -69,7 +69,7 @@ class MyApp extends StatelessWidget {
                     height: 18,
                     width: 200,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.0),
+                      color: Colors.blue.withValues(alpha: 0.5),
                     ),
                   ),
                   const SizedBox(
@@ -79,7 +79,7 @@ class MyApp extends StatelessWidget {
                     height: 18,
                     width: 200,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.0),
+                      color: Colors.blue.withValues(alpha: 0.5),
                     ),
                   ),
                   const SizedBox(
@@ -89,7 +89,7 @@ class MyApp extends StatelessWidget {
                     height: 18,
                     width: 200,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.0),
+                      color: Colors.blue.withValues(alpha: 0.5),
                     ),
                   ),
                   const SizedBox(
@@ -101,7 +101,7 @@ class MyApp extends StatelessWidget {
                 width: 120,
                 height: 100,
                 child: Container(
-                  color: Colors.blue.withValues(alpha: 0.0),
+                  color: Colors.blue.withValues(alpha: 0.5),
                 ),
               ),
               Column(
@@ -111,13 +111,13 @@ class MyApp extends StatelessWidget {
                     width: 1160,
                     height: 56,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.0),
+                      color: Colors.blue.withValues(alpha: 0.5),
                     ),
                   ),
                   SizedBox(
                     width: 1160,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.0),
+                      color: Colors.blue.withValues(alpha: 0.5),
                       child: const Center(
                           child: NormalPrintingText(
                               '藜麥毛豆糙米菇菇雞炊飯、藜麥毛豆糙米菇菇雞炊飯、藜麥毛豆糙米菇菇雞炊飯、藜麥毛豆糙米菇菇雞炊飯、蒜香彩椒青花蓮藕片、蒜香彩椒青花蓮藕片、蒜香彩椒青花蓮藕片')),
@@ -129,7 +129,7 @@ class MyApp extends StatelessWidget {
                 width: 160,
                 height: 100,
                 child: Container(
-                  color: Colors.blue.withValues(alpha: 0.0),
+                  color: Colors.blue.withValues(alpha: 0.5),
                 ),
               ),
               Column(
@@ -139,13 +139,13 @@ class MyApp extends StatelessWidget {
                     width: 1160,
                     height: 56,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.0),
+                      color: Colors.blue.withValues(alpha: 0.5),
                     ),
                   ),
                   SizedBox(
                     width: 1160,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.0),
+                      color: Colors.blue.withValues(alpha: 0.5),
                       child: const NormalPrintingText(
                           '六大類食物都攝取到了，看看下方的圖表了解這餐吃的食物分析吧！'),
                     ),
@@ -157,7 +157,7 @@ class MyApp extends StatelessWidget {
           SizedBox(
             height: 18,
             child: Container(
-              color: Colors.blue.withValues(alpha: 0.0),
+              color: Colors.blue.withValues(alpha: 0.5),
             ),
           ),
           Row(
@@ -167,13 +167,13 @@ class MyApp extends StatelessWidget {
                 width: 720,
                 height: 50,
                 child: Container(
-                  color: Colors.blue.withValues(alpha: 0.0),
+                  color: Colors.blue.withValues(alpha: 0.5),
                 ),
               ),
               SizedBox(
                 width: 360,
                 child: Container(
-                  color: Colors.blue.withValues(alpha: 0.0),
+                  color: Colors.blue.withValues(alpha: 0.5),
                   child: const HighlightPrintingText('2050'),
                 ),
               ),
@@ -181,13 +181,13 @@ class MyApp extends StatelessWidget {
                 width: 560,
                 height: 50,
                 child: Container(
-                  color: Colors.blue.withValues(alpha: 0.0),
+                  color: Colors.blue.withValues(alpha: 0.5),
                 ),
               ),
               SizedBox(
                 width: 810,
                 child: Container(
-                  color: Colors.blue.withValues(alpha: 0.0),
+                  color: Colors.blue.withValues(alpha: 0.5),
                   child: const HighlightPrintingText('1800-1900'),
                 ),
               ),
@@ -196,7 +196,7 @@ class MyApp extends StatelessWidget {
           SizedBox(
             height: 136,
             child: Container(
-              color: Colors.blue.withValues(alpha: 0.0),
+              color: Colors.blue.withValues(alpha: 0.5),
             ),
           ),
           Row(
@@ -206,7 +206,7 @@ class MyApp extends StatelessWidget {
                 width: 454,
                 height: 40,
                 child: Container(
-                  color: Colors.blue.withValues(alpha: 0.0),
+                  color: Colors.blue.withValues(alpha: 0.5),
                 ),
               ),
               Column(
@@ -216,7 +216,7 @@ class MyApp extends StatelessWidget {
                     width: 100,
                     height: 132,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.0),
+                      color: Colors.blue.withValues(alpha: 0.5),
                       child: const SmallPrintingText('1.3'),
                     ),
                   ),
@@ -224,7 +224,7 @@ class MyApp extends StatelessWidget {
                     width: 100,
                     height: 132,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.0),
+                      color: Colors.blue.withValues(alpha: 0.5),
                       child: const SmallPrintingText('0.1'),
                     ),
                   ),
@@ -232,7 +232,7 @@ class MyApp extends StatelessWidget {
                     width: 100,
                     height: 132,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.0),
+                      color: Colors.blue.withValues(alpha: 0.5),
                       child: const SmallPrintingText('2.7'),
                     ),
                   ),
@@ -240,7 +240,7 @@ class MyApp extends StatelessWidget {
                     width: 100,
                     height: 132,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.0),
+                      color: Colors.blue.withValues(alpha: 0.5),
                       child: const SmallPrintingText('0.7'),
                     ),
                   ),
@@ -248,7 +248,7 @@ class MyApp extends StatelessWidget {
                     width: 100,
                     height: 132,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.0),
+                      color: Colors.blue.withValues(alpha: 0.5),
                       child: const SmallPrintingText('3.9'),
                     ),
                   ),
@@ -256,7 +256,7 @@ class MyApp extends StatelessWidget {
                     width: 100,
                     height: 132,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.0),
+                      color: Colors.blue.withValues(alpha: 0.5),
                       child: const SmallPrintingText('0.9'),
                     ),
                   ),
@@ -266,7 +266,7 @@ class MyApp extends StatelessWidget {
                 width: 254,
                 height: 50,
                 child: Container(
-                  color: Colors.blue.withValues(alpha: 0.0),
+                  color: Colors.blue.withValues(alpha: 0.5),
                 ),
               ),
               Column(
@@ -276,7 +276,7 @@ class MyApp extends StatelessWidget {
                   SizedBox(
                       height: 33,
                       child:
-                          Container(color: Colors.blue.withValues(alpha: 0.0))),
+                          Container(color: Colors.blue.withValues(alpha: 0.5))),
                   const PrintingBar(
                     100,
                     color: Color.fromARGB(1, 236, 176, 30),
@@ -284,7 +284,7 @@ class MyApp extends StatelessWidget {
                   SizedBox(
                       height: 66,
                       child:
-                          Container(color: Colors.blue.withValues(alpha: 0.0))),
+                          Container(color: Colors.blue.withValues(alpha: 0.5))),
                   const PrintingBar(
                     100,
                     color: Color.fromARGB(1, 219, 81, 115),
@@ -292,7 +292,7 @@ class MyApp extends StatelessWidget {
                   SizedBox(
                       height: 66,
                       child:
-                          Container(color: Colors.blue.withValues(alpha: 0.0))),
+                          Container(color: Colors.blue.withValues(alpha: 0.5))),
                   const PrintingBar(
                     100,
                     color: Color.fromARGB(1, 138, 185, 45),
@@ -300,7 +300,7 @@ class MyApp extends StatelessWidget {
                   SizedBox(
                       height: 66,
                       child:
-                          Container(color: Colors.blue.withValues(alpha: 0.0))),
+                          Container(color: Colors.blue.withValues(alpha: 0.5))),
                   const PrintingBar(
                     100,
                     color: Color.fromARGB(1, 219, 103, 18),
@@ -308,7 +308,7 @@ class MyApp extends StatelessWidget {
                   SizedBox(
                       height: 66,
                       child:
-                          Container(color: Colors.blue.withValues(alpha: 0.0))),
+                          Container(color: Colors.blue.withValues(alpha: 0.5))),
                   const PrintingBar(
                     100,
                     color: Color.fromARGB(1, 213, 180, 101),
@@ -316,7 +316,7 @@ class MyApp extends StatelessWidget {
                   SizedBox(
                       height: 66,
                       child:
-                          Container(color: Colors.blue.withValues(alpha: 0.0))),
+                          Container(color: Colors.blue.withValues(alpha: 0.5))),
                   const PrintingBar(
                     100,
                     color: Color.fromARGB(1, 147, 204, 233),
@@ -324,10 +324,10 @@ class MyApp extends StatelessWidget {
                   SizedBox(
                       height: 33,
                       child:
-                          Container(color: Colors.blue.withValues(alpha: 0.0))),
+                          Container(color: Colors.blue.withValues(alpha: 0.5))),
                 ],
               ),
-              // SizedBox(width: 70, height: 35, child: Container(color: Colors.blue.withValues(alpha: 0.0),),),
+              // SizedBox(width: 70, height: 35, child: Container(color: Colors.blue.withValues(alpha: 0.5),),),
               Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
@@ -335,7 +335,7 @@ class MyApp extends StatelessWidget {
                     width: 180,
                     height: 132,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.0),
+                      color: Colors.blue.withValues(alpha: 0.5),
                       child: const NormalPrintingText('66%'),
                     ),
                   ),
@@ -343,7 +343,7 @@ class MyApp extends StatelessWidget {
                     width: 180,
                     height: 132,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.0),
+                      color: Colors.blue.withValues(alpha: 0.5),
                       child: const NormalPrintingText('10%'),
                     ),
                   ),
@@ -351,7 +351,7 @@ class MyApp extends StatelessWidget {
                     width: 180,
                     height: 132,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.0),
+                      color: Colors.blue.withValues(alpha: 0.5),
                       child: const NormalPrintingText('88%'),
                     ),
                   ),
@@ -359,7 +359,7 @@ class MyApp extends StatelessWidget {
                     width: 180,
                     height: 132,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.0),
+                      color: Colors.blue.withValues(alpha: 0.5),
                       child: const NormalPrintingText('53%'),
                     ),
                   ),
@@ -367,7 +367,7 @@ class MyApp extends StatelessWidget {
                     width: 180,
                     height: 132,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.0),
+                      color: Colors.blue.withValues(alpha: 0.5),
                       child: const NormalPrintingText('77%'),
                     ),
                   ),
@@ -375,7 +375,7 @@ class MyApp extends StatelessWidget {
                     width: 180,
                     height: 132,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.0),
+                      color: Colors.blue.withValues(alpha: 0.5),
                       child: const NormalPrintingText('60%'),
                     ),
                   ),
@@ -385,7 +385,7 @@ class MyApp extends StatelessWidget {
                 width: 550,
                 height: 35,
                 child: Container(
-                  color: Colors.blue.withValues(alpha: 0.0),
+                  color: Colors.blue.withValues(alpha: 0.5),
                 ),
               ),
               Column(
@@ -395,7 +395,7 @@ class MyApp extends StatelessWidget {
                     width: 300,
                     height: 105,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.0),
+                      color: Colors.blue.withValues(alpha: 0.5),
                       child: const NormalPrintingText('1077.7'),
                     ),
                   ),
@@ -403,7 +403,7 @@ class MyApp extends StatelessWidget {
                     width: 300,
                     height: 105,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.0),
+                      color: Colors.blue.withValues(alpha: 0.5),
                       child: const NormalPrintingText('119.4'),
                     ),
                   ),
@@ -411,7 +411,7 @@ class MyApp extends StatelessWidget {
                     width: 300,
                     height: 105,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.0),
+                      color: Colors.blue.withValues(alpha: 0.5),
                       child: const NormalPrintingText('37.8'),
                     ),
                   ),
@@ -419,7 +419,7 @@ class MyApp extends StatelessWidget {
                     width: 300,
                     height: 105,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.0),
+                      color: Colors.blue.withValues(alpha: 0.5),
                       child: const NormalPrintingText('48.3'),
                     ),
                   ),
@@ -427,7 +427,7 @@ class MyApp extends StatelessWidget {
                     width: 300,
                     height: 105,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.0),
+                      color: Colors.blue.withValues(alpha: 0.5),
                       child: const NormalPrintingText('1620.6'),
                     ),
                   ),
@@ -435,7 +435,7 @@ class MyApp extends StatelessWidget {
                     width: 300,
                     height: 105,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.0),
+                      color: Colors.blue.withValues(alpha: 0.5),
                       child: const NormalPrintingText('725.4'),
                     ),
                   ),
@@ -443,7 +443,7 @@ class MyApp extends StatelessWidget {
                     width: 300,
                     height: 105,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.0),
+                      color: Colors.blue.withValues(alpha: 0.5),
                       child: const NormalPrintingText('11.9'),
                     ),
                   ),
@@ -454,7 +454,7 @@ class MyApp extends StatelessWidget {
           SizedBox(
             height: 192,
             child: Container(
-              color: Colors.blue.withValues(alpha: 0.0),
+              color: Colors.blue.withValues(alpha: 0.5),
             ),
           ),
           Row(
@@ -464,7 +464,7 @@ class MyApp extends StatelessWidget {
                 width: 592,
                 height: 50,
                 child: Container(
-                  color: Colors.blue.withValues(alpha: 0.0),
+                  color: Colors.blue.withValues(alpha: 0.5),
                 ),
               ),
               Column(
@@ -474,14 +474,14 @@ class MyApp extends StatelessWidget {
                     width: 64,
                     height: 4,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.0),
+                      color: Colors.blue.withValues(alpha: 0.5),
                     ),
                   ),
                   SizedBox(
                     width: 64,
                     height: 180,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.0),
+                      color: Colors.blue.withValues(alpha: 0.5),
                       child: const MidPrintingText('適量'),
                     ),
                   ),
@@ -489,14 +489,14 @@ class MyApp extends StatelessWidget {
                     width: 64,
                     height: 36,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.0),
+                      color: Colors.blue.withValues(alpha: 0.5),
                     ),
                   ),
                   SizedBox(
                     width: 64,
                     height: 180,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.0),
+                      color: Colors.blue.withValues(alpha: 0.5),
                       child: const MidPrintingText('不足'),
                     ),
                   ),
@@ -504,14 +504,14 @@ class MyApp extends StatelessWidget {
                     width: 64,
                     height: 36,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.0),
+                      color: Colors.blue.withValues(alpha: 0.5),
                     ),
                   ),
                   SizedBox(
                     width: 64,
                     height: 180,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.0),
+                      color: Colors.blue.withValues(alpha: 0.5),
                       child: const MidPrintingText('適量'),
                     ),
                   ),
@@ -521,7 +521,7 @@ class MyApp extends StatelessWidget {
                 width: 56,
                 height: 50,
                 child: Container(
-                  color: Colors.blue.withValues(alpha: 0.0),
+                  color: Colors.blue.withValues(alpha: 0.5),
                 ),
               ),
               Column(
@@ -531,7 +531,7 @@ class MyApp extends StatelessWidget {
                     width: 1000,
                     height: 180,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.0),
+                      color: Colors.blue.withValues(alpha: 0.5),
                       child: SmallPrintingText(commentsForFoodTypeByRank[
                           NutritionType.grains]![Rank.good]!),
                     ),
@@ -540,14 +540,14 @@ class MyApp extends StatelessWidget {
                     width: 50,
                     height: 36,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.0),
+                      color: Colors.blue.withValues(alpha: 0.5),
                     ),
                   ),
                   SizedBox(
                     width: 1000,
                     height: 180,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.0),
+                      color: Colors.blue.withValues(alpha: 0.5),
                       child: SmallPrintingText(commentsForFoodTypeByRank[
                           NutritionType.meat]![Rank.tooLess]!),
                     ),
@@ -556,14 +556,14 @@ class MyApp extends StatelessWidget {
                     width: 50,
                     height: 36,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.0),
+                      color: Colors.blue.withValues(alpha: 0.5),
                     ),
                   ),
                   SizedBox(
                     width: 1000,
                     height: 180,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.0),
+                      color: Colors.blue.withValues(alpha: 0.5),
                       child: SmallPrintingText(commentsForFoodTypeByRank[
                           NutritionType.vegetables]![Rank.good]!),
                     ),
@@ -574,7 +574,7 @@ class MyApp extends StatelessWidget {
                 width: 472,
                 height: 50,
                 child: Container(
-                  color: Colors.blue.withValues(alpha: 0.0),
+                  color: Colors.blue.withValues(alpha: 0.5),
                 ),
               ),
               Column(
@@ -584,14 +584,14 @@ class MyApp extends StatelessWidget {
                     width: 64,
                     height: 4,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.0),
+                      color: Colors.blue.withValues(alpha: 0.5),
                     ),
                   ),
                   SizedBox(
                     width: 64,
                     height: 180,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.0),
+                      color: Colors.blue.withValues(alpha: 0.5),
                       child: const MidPrintingText('適量'),
                     ),
                   ),
@@ -599,14 +599,14 @@ class MyApp extends StatelessWidget {
                     width: 64,
                     height: 36,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.0),
+                      color: Colors.blue.withValues(alpha: 0.5),
                     ),
                   ),
                   SizedBox(
                     width: 64,
                     height: 180,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.0),
+                      color: Colors.blue.withValues(alpha: 0.5),
                       child: const MidPrintingText('不足'),
                     ),
                   ),
@@ -614,14 +614,14 @@ class MyApp extends StatelessWidget {
                     width: 64,
                     height: 36,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.0),
+                      color: Colors.blue.withValues(alpha: 0.5),
                     ),
                   ),
                   SizedBox(
                     width: 64,
                     height: 180,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.0),
+                      color: Colors.blue.withValues(alpha: 0.5),
                       child: const MidPrintingText('適量'),
                     ),
                   ),
@@ -631,7 +631,7 @@ class MyApp extends StatelessWidget {
                 width: 60,
                 height: 50,
                 child: Container(
-                  color: Colors.blue.withValues(alpha: 0.0),
+                  color: Colors.blue.withValues(alpha: 0.5),
                 ),
               ),
               Column(
@@ -641,7 +641,7 @@ class MyApp extends StatelessWidget {
                     width: 1000,
                     height: 180,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.0),
+                      color: Colors.blue.withValues(alpha: 0.5),
                       child: SmallPrintingText(commentsForFoodTypeByRank[
                           NutritionType.fruits]![Rank.tooMuch]!),
                     ),
@@ -650,14 +650,14 @@ class MyApp extends StatelessWidget {
                     width: 50,
                     height: 36,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.0),
+                      color: Colors.blue.withValues(alpha: 0.5),
                     ),
                   ),
                   SizedBox(
                     width: 1000,
                     height: 180,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.0),
+                      color: Colors.blue.withValues(alpha: 0.5),
                       child: SmallPrintingText(commentsForFoodTypeByRank[
                           NutritionType.oils]![Rank.good]!),
                     ),
@@ -666,14 +666,14 @@ class MyApp extends StatelessWidget {
                     width: 50,
                     height: 36,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.0),
+                      color: Colors.blue.withValues(alpha: 0.5),
                     ),
                   ),
                   SizedBox(
                     width: 1000,
                     height: 180,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.0),
+                      color: Colors.blue.withValues(alpha: 0.5),
                       child: SmallPrintingText(commentsForFoodTypeByRank[
                           NutritionType.grains]![Rank.tooMuch]!),
                     ),
@@ -713,6 +713,169 @@ class MyApp extends StatelessWidget {
     );
     return pdf.save();
   }
+}
+
+Future<Uint8List> _generateMockLabelPdf(PdfPageFormat format) async {
+  Widget myContainer = Container(
+    decoration: const BoxDecoration(
+      image: DecorationImage(
+        image: AssetImage("assets/images/printing_layout_2.png"),
+        fit: BoxFit.contain,
+      ),
+    ),
+    child: Column(
+      children: [
+        // Title hight
+        SizedBox(
+            height: 640,
+            child: Container(color: Colors.blue.withValues(alpha: 0.5))),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            // Padding from left group 1
+            SizedBox(
+                width: 1200,
+                height: 5,
+                child: Container(color: Colors.blue.withValues(alpha: 0.5))),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                SizedBox(
+                    height: 90,
+                    child: Center(child: NormalPrintingText('label_1_1'))),
+                // space between label group 1
+                SizedBox(
+                    height: 40,
+                    width: 460,
+                    child:
+                        Container(color: Colors.blue.withValues(alpha: 0.5))),
+                SizedBox(
+                    height: 90,
+                    child: Center(child: NormalPrintingText('label_1_2'))),
+                // space under label1 1-2
+                SizedBox(
+                    height: 120,
+                    width: 460,
+                    child:
+                        Container(color: Colors.blue.withValues(alpha: 0.5))),
+              ],
+            ),
+            // Space between label 1 and 2
+            SizedBox(
+                width: 820,
+                height: 5,
+                child: Container(color: Colors.blue.withValues(alpha: 0.5))),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                SizedBox(
+                    height: 90,
+                    child: Center(child: NormalPrintingText('label_2_1'))),
+                // space between label group 2
+                SizedBox(
+                    height: 160,
+                    width: 460,
+                    child:
+                        Container(color: Colors.blue.withValues(alpha: 0.5))),
+                SizedBox(
+                    height: 90,
+                    child: Center(child: NormalPrintingText('label_2_2'))),
+              ],
+            ),
+          ],
+        ),
+        // Space between row1 and row2
+        SizedBox(
+            height: 540,
+            child: Container(color: Colors.blue.withValues(alpha: 0.5))),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            // Padding from left group 2
+            SizedBox(
+                width: 877,
+                height: 5,
+                child: Container(color: Colors.blue.withValues(alpha: 0.5))),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                SizedBox(
+                    height: 90,
+                    child: Center(child: NormalPrintingText('label_3_1'))),
+                // space between label group 3
+                SizedBox(
+                    height: 35,
+                    width: 460,
+                    child:
+                        Container(color: Colors.blue.withValues(alpha: 0.5))),
+                SizedBox(
+                    height: 90,
+                    child: Center(child: NormalPrintingText('label_3_2'))),
+                // space under label1 1-2
+                SizedBox(
+                    height: 100,
+                    width: 460,
+                    child:
+                        Container(color: Colors.blue.withValues(alpha: 0.5))),
+              ],
+            ),
+            // Space between label 3 and 4
+            SizedBox(
+                width: 1140,
+                height: 5,
+                child: Container(color: Colors.blue.withValues(alpha: 0.5))),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                SizedBox(
+                    height: 90,
+                    child: Center(child: NormalPrintingText('label_4_1'))),
+                // space between label group 4
+                SizedBox(
+                    height: 140,
+                    width: 460,
+                    child:
+                        Container(color: Colors.blue.withValues(alpha: 0.5))),
+                SizedBox(
+                    height: 90,
+                    child: Center(child: NormalPrintingText('label_4_1'))),
+              ],
+            ),
+          ],
+        ),
+      ],
+    ),
+  );
+
+  ScreenshotController screenshotController = ScreenshotController();
+  var capturedImage = await screenshotController.captureFromWidget(myContainer,
+      pixelRatio: 1,
+      targetSize: const Size(3508, 2480),
+      delay: const Duration(seconds: 3));
+
+  final pdf = pw.Document();
+  pdf.addPage(
+    pw.Page(
+      pageFormat: format.copyWith(
+          marginBottom: 0.3 * PdfPageFormat.cm,
+          marginLeft: 0.3 * PdfPageFormat.cm,
+          marginRight: 0.3 * PdfPageFormat.cm,
+          marginTop: 0.3 * PdfPageFormat.cm),
+      build: (context) {
+        return pw.Center(
+          child: pw.Image(
+            pw.MemoryImage(capturedImage),
+            fit: pw.BoxFit.contain,
+          ),
+        );
+      },
+    ),
+  );
+  return pdf.save();
 }
 
 class NormalPrintingText extends StatelessWidget {
@@ -786,7 +949,7 @@ class PrintingBar extends StatelessWidget {
         SizedBox(
           width: 1222.0 * (1.0 - percent / 100.0),
           height: 66,
-          child: Container(color: Colors.blue.withValues(alpha: 0.0)),
+          child: Container(color: Colors.blue.withValues(alpha: 0.5)),
         ),
       ],
     );

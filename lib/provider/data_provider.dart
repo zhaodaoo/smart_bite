@@ -11,6 +11,7 @@ import 'package:smart_bite/data/comments.dart';
 import 'package:smart_bite/data/constant.dart';
 import 'package:smart_bite/data/dailyneeds_for_sixteen_above.dart';
 import 'package:smart_bite/data/dishes_info.dart';
+import 'package:smart_bite/data/dishes_label.dart';
 import 'package:smart_bite/data/dailyneeds_for_under_fifteen.dart';
 
 class DataProvider extends ChangeNotifier {
@@ -70,6 +71,20 @@ class DataProvider extends ChangeNotifier {
     NutritionType.oils: '',
     NutritionType.dairy: '',
   };
+
+  // Needed 3Label and 1 QR Code
+  String _productResumeLabelDishes = '雙薯搖滾蛋沙拉（舉例）';
+  String _productResumeLabelFood = '甘藷（地瓜）';
+  bool _productResumeLabelDishesIsDefault = true;
+  String _casLabelDishes = '雞肉親子丼（舉例）';
+  String _casLabelFood = '雞蛋';
+  bool _casLabelDishesIsDefault = true;
+  String _organicLabelDishes = '胡麻菠菜（舉例）';
+  String _organicLabelFood = '菠菜';
+  bool _organicLabelDishesIsDefault = true;
+  String _traceableLabelDishes = '櫛瓜蒸蛋（舉例）';
+  String _traceableLabelFood = '櫛瓜';
+  bool _traceableLabelDishesIsDefault = true;
 
   Meal get meal => _meal;
   ActivityLevel get activityLevel => _activityLevel;
@@ -160,6 +175,33 @@ class DataProvider extends ChangeNotifier {
   }
 
   Future<void> analyze() async {
+    // Intake meal labels and foods
+    for (var orderName in orderNames) {
+      Map<Label, String>? dishLabelInfo = dishesLabel[orderName];
+      if (dishLabelInfo == null) continue;
+      if (_productResumeLabelDishesIsDefault &&
+          dishLabelInfo[Label.type] == '產銷履歷農產品') {
+        _productResumeLabelDishesIsDefault = false;
+        _productResumeLabelDishes = orderName;
+        _productResumeLabelFood = dishLabelInfo[Label.food]!;
+      } else if (_casLabelDishesIsDefault &&
+          dishLabelInfo[Label.type] == '台灣優良農產品') {
+        _casLabelDishesIsDefault = false;
+        _casLabelDishes = orderName;
+        _casLabelFood = dishLabelInfo[Label.food]!;
+      } else if (_organicLabelDishesIsDefault &&
+          dishLabelInfo[Label.type] == '有機農產品') {
+        _organicLabelDishesIsDefault = false;
+        _organicLabelDishes = orderName;
+        _organicLabelFood = dishLabelInfo[Label.food]!;
+      } else if (_traceableLabelDishesIsDefault &&
+          dishLabelInfo[Label.type] == '溯源農糧產品') {
+        _traceableLabelDishesIsDefault = false;
+        _traceableLabelDishes = orderName;
+        _traceableLabelFood = dishLabelInfo[Label.food]!;
+      }
+    }
+
     // Intake meal nutririon
     List<Map<NutritionType, double>?> eachMealNutrition = orderNames
         .map((name) => dishesInfo[name] as Map<NutritionType, double>?)
@@ -222,7 +264,7 @@ class DataProvider extends ChangeNotifier {
     debugPrint('commentsByFoodType = $_commentsByFoodType');
   }
 
-  Future<Uint8List> generatePdf(PdfPageFormat format) async {
+  Future<Uint8List> generateReportPdf(PdfPageFormat format) async {
     Widget myContainer = Container(
       decoration: const BoxDecoration(
         image: DecorationImage(
@@ -778,6 +820,179 @@ class DataProvider extends ChangeNotifier {
         ],
       ),
     );
+
+    ScreenshotController screenshotController = ScreenshotController();
+    var capturedImage = await screenshotController.captureFromWidget(
+        myContainer,
+        pixelRatio: 1,
+        targetSize: const Size(3508, 2480),
+        delay: const Duration(seconds: 3));
+
+    final pdf = pw.Document();
+    pdf.addPage(
+      pw.Page(
+        pageFormat: format.copyWith(
+            marginBottom: 0.3 * PdfPageFormat.cm,
+            marginLeft: 0.3 * PdfPageFormat.cm,
+            marginRight: 0.3 * PdfPageFormat.cm,
+            marginTop: 0.3 * PdfPageFormat.cm),
+        build: (context) {
+          return pw.Center(
+            child: pw.Image(
+              pw.MemoryImage(capturedImage),
+              fit: pw.BoxFit.contain,
+            ),
+          );
+        },
+      ),
+    );
+    return pdf.save();
+  }
+
+  Future<Uint8List> generateLabelPdf(PdfPageFormat format) async {
+    Widget myContainer = Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage("assets/images/printing_layout.png"),
+            fit: BoxFit.contain,
+          ),
+        ),
+        child: Column(
+          children: [
+            // Title hight
+            SizedBox(
+                height: 640,
+                child: Container(color: Colors.blue.withValues(alpha: 0))),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                // product resume
+                SizedBox(
+                    width: 1200,
+                    height: 5,
+                    child: Container(color: Colors.blue.withValues(alpha: 0))),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    SizedBox(
+                        height: 90,
+                        child: Center(
+                            child:
+                                NormalPrintingText(_productResumeLabelDishes))),
+                    // space between label group 1
+                    SizedBox(
+                        height: 40,
+                        width: 460,
+                        child:
+                            Container(color: Colors.blue.withValues(alpha: 0))),
+                    SizedBox(
+                        height: 90,
+                        child: Center(
+                            child:
+                                NormalPrintingText(_productResumeLabelFood))),
+                    // space under label1 1-2
+                    SizedBox(
+                        height: 120,
+                        width: 460,
+                        child:
+                            Container(color: Colors.blue.withValues(alpha: 0))),
+                  ],
+                ),
+                // Space between label 1 and 2
+                SizedBox(
+                    width: 820,
+                    height: 5,
+                    child: Container(color: Colors.blue.withValues(alpha: 0))),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    SizedBox(
+                        height: 90,
+                        child:
+                            Center(child: NormalPrintingText(_casLabelDishes))),
+                    // space between label group 2
+                    SizedBox(
+                        height: 160,
+                        width: 460,
+                        child:
+                            Container(color: Colors.blue.withValues(alpha: 0))),
+                    SizedBox(
+                        height: 90,
+                        child:
+                            Center(child: NormalPrintingText(_casLabelFood))),
+                  ],
+                ),
+              ],
+            ),
+            // Space between row1 and row2
+            SizedBox(
+                height: 540,
+                child: Container(color: Colors.blue.withValues(alpha: 0))),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                // Padding from left group 2
+                SizedBox(
+                    width: 877,
+                    height: 5,
+                    child: Container(color: Colors.blue.withValues(alpha: 0))),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    SizedBox(
+                        height: 90,
+                        child: Center(
+                            child: NormalPrintingText(_organicLabelDishes))),
+                    // space between label group 3
+                    SizedBox(
+                        height: 35,
+                        width: 460,
+                        child:
+                            Container(color: Colors.blue.withValues(alpha: 0))),
+                    SizedBox(
+                        height: 90,
+                        child: Center(
+                            child: NormalPrintingText(_organicLabelFood))),
+                    // space under label1 1-2
+                    SizedBox(
+                        height: 100,
+                        width: 460,
+                        child:
+                            Container(color: Colors.blue.withValues(alpha: 0))),
+                  ],
+                ),
+                // Space between label 3 and 4
+                SizedBox(
+                    width: 1140,
+                    height: 5,
+                    child: Container(color: Colors.blue.withValues(alpha: 0))),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    SizedBox(
+                        height: 90,
+                        child: Center(
+                            child: NormalPrintingText(_traceableLabelDishes))),
+                    // space between label group 4
+                    SizedBox(
+                        height: 140,
+                        width: 460,
+                        child:
+                            Container(color: Colors.blue.withValues(alpha: 0))),
+                    SizedBox(
+                        height: 90,
+                        child: Center(
+                            child: NormalPrintingText(_traceableLabelFood))),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ));
 
     ScreenshotController screenshotController = ScreenshotController();
     var capturedImage = await screenshotController.captureFromWidget(
