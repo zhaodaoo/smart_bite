@@ -73,13 +73,13 @@ class DataProvider extends ChangeNotifier {
   };
 
   // Needed 3Label and 1 QR Code
-  String _productResumeLabelDishes = '雙薯搖滾蛋沙拉（舉例）';
+  String _productResumeLabelDishes = '';
   String _productResumeLabelFood = '甘藷（地瓜）';
   bool _productResumeLabelDishesIsDefault = true;
-  String _casLabelDishes = '雞肉親子丼（舉例）';
+  String _casLabelDishes = '';
   String _casLabelFood = '雞蛋';
   bool _casLabelDishesIsDefault = true;
-  String _organicLabelDishes = '胡麻菠菜（舉例）';
+  String _organicLabelDishes = '';
   String _organicLabelFood = '菠菜';
   bool _organicLabelDishesIsDefault = true;
   String _traceableLabelDishes = '櫛瓜蒸蛋（舉例）';
@@ -132,43 +132,42 @@ class DataProvider extends ChangeNotifier {
         .where((value) => value > 100)
         .isNotEmpty) {
       //單一食物超過當天所需的份量
-      return overallCommentsByRank[Rank.tooMuch]!;
+      return overallCommentsByRank[Rank.tooMuch] ?? '請檢查攝取量';
     } else if (_intakeFoodTypeDailyProportion.values
         .where((value) => value < 10)
         .isNotEmpty) {
       //任一食物選擇少於當天所需的10％以內
-      return overallCommentsByRank[Rank.tooLess]!;
+      return overallCommentsByRank[Rank.tooLess] ?? '請檢查攝取量';
     } else {
       // 六大類食物都有選，且都大於當天所需的10％以上，並且沒有超過單一天的份量
-      return overallCommentsByRank[Rank.good]!;
+      return overallCommentsByRank[Rank.good] ?? '攝取均衡';
     }
   }
 
   Map<NutritionType, String> getCommentByFoodType() {
     return _commentsByFoodType.map((key, value) {
-      if (_intakeFoodTypeDailyProportion[key]! > 100) {
-        // ignore: collection_methods_unrelated_type
-        return MapEntry(key, commentsForFoodTypeByRank[key]![Rank.tooMuch]!);
-      } else if (_intakeFoodTypeDailyProportion[key]! < 100) {
-        // ignore: collection_methods_unrelated_type
-        return MapEntry(key, commentsForFoodTypeByRank[key]![Rank.tooLess]!);
+      final proportion = _intakeFoodTypeDailyProportion[key] ?? 0;
+      if (proportion > 100) {
+        final comment = commentsForFoodTypeByRank[key]?[Rank.tooMuch];
+        return MapEntry(key, comment ?? '攝取過量');
+      } else if (proportion < 100) {
+        final comment = commentsForFoodTypeByRank[key]?[Rank.tooLess];
+        return MapEntry(key, comment ?? '攝取不足');
       } else {
-        // ignore: collection_methods_unrelated_type
-        return MapEntry(key, commentsForFoodTypeByRank[key]![Rank.good]!);
+        final comment = commentsForFoodTypeByRank[key]?[Rank.good];
+        return MapEntry(key, comment ?? '攝取適量');
       }
     });
   }
 
   Map<NutritionType, String> getRanksLabelByFoodType() {
     return _ranksByFoodType.map((key, value) {
-      if (_intakeFoodTypeDailyProportion[key]! > 100) {
-        // ignore: collection_methods_unrelated_type
+      final proportion = _intakeFoodTypeDailyProportion[key] ?? 0;
+      if (proportion > 100) {
         return MapEntry(key, getRankLabel(Rank.tooMuch));
-      } else if (_intakeFoodTypeDailyProportion[key]! < 100) {
-        // ignore: collection_methods_unrelated_type
+      } else if (proportion < 100) {
         return MapEntry(key, getRankLabel(Rank.tooLess));
       } else {
-        // ignore: collection_methods_unrelated_type
         return MapEntry(key, getRankLabel(Rank.good));
       }
     });
@@ -176,77 +175,116 @@ class DataProvider extends ChangeNotifier {
 
   Future<void> analyze() async {
     // Intake meal labels and foods
-    for (var orderName in orderNames) {
-      Map<Label, String>? dishLabelInfo = dishesLabel[orderName];
+    for (var name in orderNames) {
+      Map<Label, String>? dishLabelInfo = dishesLabel[name];
       if (dishLabelInfo == null) continue;
       if (_productResumeLabelDishesIsDefault &&
           dishLabelInfo[Label.type] == '產銷履歷農產品') {
         _productResumeLabelDishesIsDefault = false;
-        _productResumeLabelDishes = orderName;
-        _productResumeLabelFood = dishLabelInfo[Label.food]!;
+        _productResumeLabelDishes = name;
+        _productResumeLabelFood = dishLabelInfo[Label.food] ?? '';
       } else if (_casLabelDishesIsDefault &&
           dishLabelInfo[Label.type] == '台灣優良農產品') {
         _casLabelDishesIsDefault = false;
-        _casLabelDishes = orderName;
-        _casLabelFood = dishLabelInfo[Label.food]!;
+        _casLabelDishes = name;
+        _casLabelFood = dishLabelInfo[Label.food] ?? '';
       } else if (_organicLabelDishesIsDefault &&
           dishLabelInfo[Label.type] == '有機農產品') {
         _organicLabelDishesIsDefault = false;
-        _organicLabelDishes = orderName;
-        _organicLabelFood = dishLabelInfo[Label.food]!;
+        _organicLabelDishes = name;
+        _organicLabelFood = dishLabelInfo[Label.food] ?? '';
       } else if (_traceableLabelDishesIsDefault &&
           dishLabelInfo[Label.type] == '溯源農糧產品') {
         _traceableLabelDishesIsDefault = false;
-        _traceableLabelDishes = orderName;
-        _traceableLabelFood = dishLabelInfo[Label.food]!;
+        _traceableLabelDishes = name;
+        _traceableLabelFood = dishLabelInfo[Label.food] ?? '';
+      }
+      if (!(_productResumeLabelDishesIsDefault ||
+          _casLabelDishesIsDefault ||
+          _organicLabelDishesIsDefault ||
+          _traceableLabelDishesIsDefault)) {
+        break;
       }
     }
 
     // Intake meal nutririon
-    List<Map<NutritionType, double>?> eachMealNutrition = orderNames
-        .map((name) => dishesInfo[name] as Map<NutritionType, double>?)
-        .toList();
+    List<Map<NutritionType, double>?> eachMealNutrition =
+        orderNames.map((name) => dishesInfo[name]).toList();
     Map<NutritionType, double> intakeTotalNutrition = {};
     intakeTotalNutrition.addEntries(NutritionType.values.map((key) => MapEntry(
         key,
         eachMealNutrition
-            .map((meal) => meal![key])
-            .fold(0.0, (previousValue, element) => previousValue + element!))));
+            .where((meal) => meal != null)
+            .map((meal) => meal![key] ?? 0.0)
+            .fold(0.0, (previousValue, element) => previousValue + element))));
     debugPrint('intakeTotalNutrition = $intakeTotalNutrition');
 
     if ([Age.zeroToNine, Age.tenToTwelve, Age.thirteenToFifteen]
         .contains(_age)) {
       // Needed nutririons
-      Map<NutritionType, double> todayNeeds =
-          dailyNeedsForUnderFifteen[_sex]![_age]![_activityLevel]!;
+      final sexData = dailyNeedsForUnderFifteen[_sex];
+      final ageData = sexData?[_age];
+      final activityData = ageData?[_activityLevel];
+
+      if (activityData == null) {
+        debugPrint('Error: No data found for $_sex, $_age, $_activityLevel');
+        return;
+      }
+
+      Map<NutritionType, double> todayNeeds = activityData;
       debugPrint('todayNeeds = $todayNeeds');
 
       // Needed Result
-      _neededCalariePerDay = todayNeeds[NutritionType.calorie]!.round();
+      _neededCalariePerDay = (todayNeeds[NutritionType.calorie] ?? 0).round();
       _neededCalarieThisMeal =
-          (_neededCalariePerDay * mealProportion[_meal]!).round();
-      _intakeFoodTypeDailyProportion = intakeFoodTypeDailyProportion.map((key,
-              _) =>
-          MapEntry(key, intakeTotalNutrition[key]! / todayNeeds[key]! * 100));
-      _intakeTotalNutritionWithoutFoddType = intakeTotalNutritionWithoutFoddType
-          .map((key, _) => MapEntry(key, intakeTotalNutrition[key]!));
+          (_neededCalariePerDay * (mealProportion[_meal] ?? 0)).round();
+      _intakeFoodTypeDailyProportion =
+          _intakeFoodTypeDailyProportion.map((key, _) {
+        final intake = intakeTotalNutrition[key] ?? 0;
+        final need = todayNeeds[key] ?? 1; // Avoid division by zero
+        return MapEntry(key, intake / need * 100);
+      });
+      _intakeTotalNutritionWithoutFoddType =
+          _intakeTotalNutritionWithoutFoddType
+              .map((key, _) => MapEntry(key, intakeTotalNutrition[key] ?? 0));
     } else {
-      _neededCalariePerDay =
-          dailyCalorieNeedsForAboveSixteen[_sex]![_age]![_activityLevel]!;
+      final sexData = dailyCalorieNeedsForAboveSixteen[_sex];
+      final ageData = sexData?[_age];
+      final calorieNeed = ageData?[_activityLevel];
+
+      if (calorieNeed == null) {
+        debugPrint(
+            'Error: No calorie data found for $_sex, $_age, $_activityLevel');
+        return;
+      }
+
+      _neededCalariePerDay = calorieNeed;
       _neededCalarieThisMeal =
-          (_neededCalariePerDay * mealProportion[_meal]!).round();
-      Map<NutritionType, double> todayNeededFoodType =
-          dailyFoodTypeNeedsForAboveSixteen[
-              (_neededCalariePerDay / 100).floor() * 100]!;
+          (_neededCalariePerDay * (mealProportion[_meal] ?? 0)).round();
+
+      final foodTypeData = dailyFoodTypeNeedsForAboveSixteen[
+          (_neededCalariePerDay / 100).floor() * 100];
+
+      if (foodTypeData == null) {
+        debugPrint(
+            'Error: No food type data found for calorie level ${(_neededCalariePerDay / 100).floor() * 100}');
+        return;
+      }
+
+      Map<NutritionType, double> todayNeededFoodType = foodTypeData;
 
       // Needed Result
-      _intakeFoodTypeDailyProportion = intakeFoodTypeDailyProportion.map(
-          (key, _) => MapEntry(key,
-              intakeTotalNutrition[key]! / todayNeededFoodType[key]! * 100));
+      _intakeFoodTypeDailyProportion =
+          _intakeFoodTypeDailyProportion.map((key, _) {
+        final intake = intakeTotalNutrition[key] ?? 0;
+        final need = todayNeededFoodType[key] ?? 1; // Avoid division by zero
+        return MapEntry(key, intake / need * 100);
+      });
       _intakeFoodType = _intakeFoodType
-          .map((key, _) => MapEntry(key, intakeTotalNutrition[key]!));
-      _intakeTotalNutritionWithoutFoddType = intakeTotalNutritionWithoutFoddType
-          .map((key, _) => MapEntry(key, intakeTotalNutrition[key]!));
+          .map((key, _) => MapEntry(key, intakeTotalNutrition[key] ?? 0));
+      _intakeTotalNutritionWithoutFoddType =
+          _intakeTotalNutritionWithoutFoddType
+              .map((key, _) => MapEntry(key, intakeTotalNutrition[key] ?? 0));
     }
 
     debugPrint('neededCalariePerDay = $_neededCalariePerDay');
@@ -853,7 +891,7 @@ class DataProvider extends ChangeNotifier {
     Widget myContainer = Container(
         decoration: const BoxDecoration(
           image: DecorationImage(
-            image: AssetImage("assets/images/printing_layout.png"),
+            image: AssetImage("assets/images/printing_layout_2.png"),
             fit: BoxFit.contain,
           ),
         ),

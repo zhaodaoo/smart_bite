@@ -1,6 +1,6 @@
 import 'package:smart_bite/data/constant.dart';
 
-Map<String, Map> dishesInfo = {
+Map<String, Map<NutritionType, double>> dishesInfo = {
   "雙薯搖滾蛋沙拉": {
     NutritionType.grains: 0.18,
     NutritionType.meat: 0.5,
