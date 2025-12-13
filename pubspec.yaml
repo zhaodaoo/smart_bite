@@ -43,6 +43,7 @@ dependencies:
   screenshot: ^3.0.0
   image_gallery_saver: ^2.0.3
   path_provider: ^2.1.4
+  dart_periphery: ^0.9.19
 
 dev_dependencies:
   flutter_test:
