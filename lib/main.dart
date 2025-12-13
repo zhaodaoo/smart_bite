@@ -41,6 +41,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Smart Bite!',
         theme: ThemeData(
+          fontFamily: 'NotoSansCJK',
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.brown),
           useMaterial3: true,
         ),
