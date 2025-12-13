@@ -15,6 +15,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:dart_periphery/dart_periphery.dart';
 import '../interfaces/rfid_reader.dart';
 
 /// Configuration for a single RC522 module on the shared SPI bus
@@ -62,11 +63,18 @@ class MFRC522Registers {
   // Mode
   static const int modeReg = 0x11;
   static const int txControlReg = 0x14;
-  static const int txAutoReg = 0x15;
+  static const int txASKReg = 0x15;
   
   // Timer
-  static const int timerReloadReg = 0x2C;
+  static const int tModeReg = 0x2A;
+  static const int tPrescalerReg = 0x2B;
+  static const int tReloadRegH = 0x2C;
+  static const int tReloadRegL = 0x2D;
+  
+  // Legacy timer (for backward compatibility)
   static const int timerModeReg = 0x2A;
+  static const int timerReloadReg = 0x2C;
+  static const int txAutoReg = 0x15;
   
   // Version
   static const int versionReg = 0x37;
@@ -93,6 +101,9 @@ class GPIOSPIRFIDAdapter implements RFIDReader {
   
   final StreamController<RFIDReading> _readingsController = 
       StreamController<RFIDReading>.broadcast();
+  
+  // SPI instance (created on connect)
+  SPI? _spi;
 
   GPIOSPIRFIDAdapter({
     required RC522Config config,
@@ -120,6 +131,13 @@ class GPIOSPIRFIDAdapter implements RFIDReader {
       await _initializeGPIO(_config.rstPin, 'rst');
       await _initializeGPIO(_config.ssPin, 'ss');
       
+      // Initialize SPI (bus 0, chip 0, mode 0, 1 MHz)
+      // SPI device: /dev/spidev0.0
+      _spi = SPI(0, 0, SPImode.mode0, 1000000);
+      
+      // Set SS high (deselect)
+      await _setGPIO(_config.ssPin, true);
+      
       // Reset the RC522 module
       await _resetModule();
       
@@ -139,6 +157,10 @@ class GPIOSPIRFIDAdapter implements RFIDReader {
   @override
   Future<void> disconnect() async {
     _status = ReaderStatus.disconnected;
+    
+    // Close SPI
+    _spi?.dispose();
+    _spi = null;
     
     // Unexport GPIO pins
     await _cleanupGPIO(_config.rstPin);
@@ -255,33 +277,89 @@ class GPIOSPIRFIDAdapter implements RFIDReader {
   // ========== SPI Communication ==========
 
   Future<void> _spiWrite(int register, int value) async {
-    // SPI write: address byte with MSB=0, followed by data byte
-    // This is a placeholder - actual implementation needs SPI library
-    // In production, use packages like 'dart_periphery' or native extensions
+    if (_spi == null) {
+      throw StateError('SPI not initialized');
+    }
     
-    debugPrint('[$address] SPI Write: reg=0x${register.toRadixString(16)}, val=0x${value.toRadixString(16)}');
-    
-    // TODO: Implement actual SPI communication
-    // Example using dart_periphery:
-    // final spi = SPI(_config.spiDevice, 0, 1000000);
-    // final txBuf = Uint8List.fromList([(register << 1) & 0x7E, value]);
-    // spi.transfer(txBuf, rxBuf);
+    try {
+      // Select chip (SS low)
+      await _setGPIO(_config.ssPin, false);
+      await Future.delayed(const Duration(microseconds: 10));
+      
+      // SPI write: address byte with MSB=0, followed by data byte
+      final data = [(register << 1) & 0x7E, value];
+      
+      _spi!.transfer(data, false);
+      
+      // Deselect chip (SS high)
+      await Future.delayed(const Duration(microseconds: 10));
+      await _setGPIO(_config.ssPin, true);
+      
+      debugPrint('[$address] SPI Write: reg=0x${register.toRadixString(16)}, val=0x${value.toRadixString(16)}');
+    } catch (e) {
+      await _setGPIO(_config.ssPin, true); // Ensure deselect on error
+      debugPrint('[$address] SPI write error: $e');
+      rethrow;
+    }
   }
 
   Future<int> _spiRead(int register) async {
-    // SPI read: address byte with MSB=1, followed by reading data byte
-    // This is a placeholder - actual implementation needs SPI library
+    if (_spi == null) {
+      throw StateError('SPI not initialized');
+    }
     
-    debugPrint('[$address] SPI Read: reg=0x${register.toRadixString(16)}');
+    try {
+      // Select chip (SS low)
+      await _setGPIO(_config.ssPin, false);
+      await Future.delayed(const Duration(microseconds: 10));
+      
+      // SPI read: address byte with MSB=1, followed by reading data byte
+      final data = [((register << 1) & 0x7E) | 0x80, 0x00];
+      
+      final response = _spi!.transfer(data, false);
+      
+      // Deselect chip (SS high)
+      await Future.delayed(const Duration(microseconds: 10));
+      await _setGPIO(_config.ssPin, true);
+      
+      final value = response[1];
+      debugPrint('[$address] SPI Read: reg=0x${register.toRadixString(16)} = 0x${value.toRadixString(16)}');
+      
+      return value;
+    } catch (e) {
+      await _setGPIO(_config.ssPin, true); // Ensure deselect on error
+      debugPrint('[$address] SPI read error: $e');
+      rethrow;
+    }
+  }
+  
+  /// Read multiple bytes from a register
+  Future<Uint8List> _spiReadMultiple(int register, int count) async {
+    if (_spi == null) {
+      throw StateError('SPI not initialized');
+    }
     
-    // TODO: Implement actual SPI communication
-    // Example using dart_periphery:
-    // final spi = SPI(_config.spiDevice, 0, 1000000);
-    // final txBuf = Uint8List.fromList([((register << 1) & 0x7E) | 0x80, 0x00]);
-    // final rxBuf = spi.transfer(txBuf);
-    // return rxBuf[1];
-    
-    return 0; // Placeholder
+    try {
+      // Select chip (SS low)
+      await _setGPIO(_config.ssPin, false);
+      await Future.delayed(const Duration(microseconds: 10));
+      
+      // First byte is address with MSB=1
+      final data = [((register << 1) & 0x7E) | 0x80] + List.filled(count, 0x00);
+      
+      final response = _spi!.transfer(data, false);
+      
+      // Deselect chip (SS high)
+      await Future.delayed(const Duration(microseconds: 10));
+      await _setGPIO(_config.ssPin, true);
+      
+      // Return data bytes (skip first address byte)
+      return Uint8List.fromList(response.sublist(1));
+    } catch (e) {
+      await _setGPIO(_config.ssPin, true);
+      debugPrint('[$address] SPI read multiple error: $e');
+      rethrow;
+    }
   }
 
   // ========== MFRC522 Protocol ==========
@@ -297,9 +375,23 @@ class GPIOSPIRFIDAdapter implements RFIDReader {
   }
 
   Future<void> _initializeMFRC522() async {
+    // Hardware reset via RST pin
+    await _setGPIO(_config.rstPin, false);
+    await Future.delayed(const Duration(microseconds: 10));
+    await _setGPIO(_config.rstPin, true);
+    await Future.delayed(const Duration(milliseconds: 50)); // Wait for oscillator to stabilize
+    
     // Software reset
     await _spiWrite(MFRC522Registers.commandReg, MFRC522Commands.softreset);
     await Future.delayed(const Duration(milliseconds: 50));
+    
+    // Wait for reset to complete (check if PowerDown bit is cleared)
+    int retries = 10;
+    while (retries-- > 0) {
+      final commandReg = await _spiRead(MFRC522Registers.commandReg);
+      if ((commandReg & 0x10) == 0) break; // PowerDown bit cleared
+      await Future.delayed(const Duration(milliseconds: 5));
+    }
     
     // Configure timer
     await _spiWrite(MFRC522Registers.timerModeReg, 0x8D);
@@ -314,6 +406,10 @@ class GPIOSPIRFIDAdapter implements RFIDReader {
     // Read version to verify communication
     final version = await _spiRead(MFRC522Registers.versionReg);
     debugPrint('[$address] MFRC522 version: 0x${version.toRadixString(16)}');
+    
+    if (version != 0x91 && version != 0x92) {
+      debugPrint('[$address] WARNING: Unexpected MFRC522 version (expected 0x91 or 0x92)');
+    }
   }
 
   Future<void> _setAntennaOn() async {
@@ -325,37 +421,119 @@ class GPIOSPIRFIDAdapter implements RFIDReader {
 
   Future<bool> _requestCard() async {
     // Send REQA command to detect card presence
-    // This is simplified - actual implementation needs full MFRC522 protocol
-    
-    // TODO: Implement full PICC_REQA command sequence
-    // 1. Clear FIFO
-    // 2. Write REQA command to FIFO
-    // 3. Execute Transceive command
-    // 4. Wait for IRQ
-    // 5. Check response (ATQA - Answer To Request A)
-    
-    debugPrint('[$address] Requesting card presence...');
-    
-    // Placeholder: simulate card detection
-    // In production, this checks for ATQA response
-    return false; // TODO: Return actual card presence status
+    try {
+      // Clear internal buffer
+      await _spiWrite(MFRC522Registers.fifoLevelReg, 0x80);
+      
+      // Write REQA command to FIFO
+      await _spiWrite(MFRC522Registers.fifoDataReg, PICCCommands.reqidl);
+      
+      // Configure bit framing (7 bits for REQA)
+      await _spiWrite(MFRC522Registers.bitFramingReg, 0x07);
+      
+      // Execute Transceive command
+      await _spiWrite(MFRC522Registers.commandReg, MFRC522Commands.transceive);
+      
+      // Start transmission
+      final currentControlReg = await _spiRead(MFRC522Registers.controlReg);
+      await _spiWrite(MFRC522Registers.controlReg, currentControlReg | 0x80);
+      
+      // Wait for command completion (timeout 25ms)
+      final deadline = DateTime.now().add(const Duration(milliseconds: 25));
+      while (DateTime.now().isBefore(deadline)) {
+        final irqReg = await _spiRead(MFRC522Registers.comIrqReg);
+        
+        // Check if transmission complete or timeout
+        if ((irqReg & 0x01) != 0) { // Timer interrupt
+          break;
+        }
+        if ((irqReg & 0x30) != 0) { // RxIRq or IdleIRq
+          // Check FIFO level (should have ATQA response: 2 bytes)
+          final fifoLevel = await _spiRead(MFRC522Registers.fifoLevelReg);
+          if (fifoLevel >= 2) {
+            debugPrint('[$address] Card detected (ATQA received)');
+            return true;
+          }
+          break;
+        }
+        
+        await Future.delayed(const Duration(milliseconds: 1));
+      }
+      
+      debugPrint('[$address] No card detected');
+      return false;
+      
+    } catch (e) {
+      debugPrint('[$address] Error requesting card: $e');
+      return false;
+    }
   }
 
   Future<Uint8List?> _readCardUID() async {
     // Anti-collision loop to read card UID
-    // ISO14443A: UID can be 4, 7, or 10 bytes
-    
-    // TODO: Implement full anti-collision protocol
-    // 1. Send ANTICOLL command
-    // 2. Receive UID cascade levels
-    // 3. Verify BCC (Block Check Character)
-    // 4. Return complete UID
-    
-    debugPrint('[$address] Reading card UID...');
-    
-    // Placeholder: return mock UID for testing
-    // In production, this performs anti-collision and returns actual UID
-    return null; // TODO: Return actual UID bytes
+    try {
+      // Send ANTICOLL command
+      await _spiWrite(MFRC522Registers.fifoLevelReg, 0x80); // Clear FIFO
+      await _spiWrite(MFRC522Registers.fifoDataReg, PICCCommands.anticoll);
+      await _spiWrite(MFRC522Registers.fifoDataReg, 0x20); // NVB (Number of Valid Bits)
+      
+      // Configure bit framing
+      await _spiWrite(MFRC522Registers.bitFramingReg, 0x00);
+      
+      // Execute Transceive
+      await _spiWrite(MFRC522Registers.commandReg, MFRC522Commands.transceive);
+      
+      // Start transmission
+      final currentControlReg = await _spiRead(MFRC522Registers.controlReg);
+      await _spiWrite(MFRC522Registers.controlReg, currentControlReg | 0x80);
+      
+      // Wait for response (timeout 100ms)
+      final deadline = DateTime.now().add(const Duration(milliseconds: 100));
+      while (DateTime.now().isBefore(deadline)) {
+        final irqReg = await _spiRead(MFRC522Registers.comIrqReg);
+        
+        if ((irqReg & 0x30) != 0) {
+          // Check for errors
+          final errorReg = await _spiRead(MFRC522Registers.errorReg);
+          if ((errorReg & 0x1B) != 0) {
+            debugPrint('[$address] Collision or error during anti-collision: 0x${errorReg.toRadixString(16)}');
+            return null;
+          }
+          
+          // Read UID from FIFO (should be 5 bytes: 4 UID + 1 BCC)
+          final fifoLevel = await _spiRead(MFRC522Registers.fifoLevelReg);
+          if (fifoLevel >= 5) {
+            final uidData = await _spiReadMultiple(MFRC522Registers.fifoDataReg, 5);
+            
+            // Verify BCC (Block Check Character)
+            int bcc = 0;
+            for (int i = 0; i < 4; i++) {
+              bcc ^= uidData[i];
+            }
+            
+            if (bcc == uidData[4]) {
+              // BCC valid, return 4-byte UID
+              final uid = Uint8List.fromList(uidData.sublist(0, 4));
+              debugPrint('[$address] UID read successfully: ${_uidToHexString(uid)}');
+              return uid;
+            } else {
+              debugPrint('[$address] BCC mismatch: calculated=0x${bcc.toRadixString(16)}, received=0x${uidData[4].toRadixString(16)}');
+              return null;
+            }
+          }
+          break;
+        }
+        
+        await Future.delayed(const Duration(milliseconds: 2));
+      }
+      
+      debugPrint('[$address] Timeout reading UID');
+      return null;
+      
+    } catch (e) {
+      debugPrint('[$address] Error reading UID: $e');
+      return null;
+    }
   }
 
   String _uidToHexString(Uint8List uid) {

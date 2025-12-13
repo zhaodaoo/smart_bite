@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:smart_bite/data/constant.dart';
-import 'package:smart_bite/data/id_to_meal.dart';
 import 'package:smart_bite/provider/data_provider.dart';
-import 'package:smart_bite/provider/serial_provider.dart';
+import 'package:smart_bite/provider/rfid_reader_provider.dart';
+import 'package:smart_bite/widgets/refactored_order_page.dart';
 import 'package:smart_bite/screens/setting_screen.dart';
 
 import 'package:pdf/pdf.dart';
@@ -114,7 +114,7 @@ class _InputScreenState extends State<InputScreen> {
                       });
                     },
                   ),
-                Page.orderPage => OrderPage(
+                Page.orderPage => RefactoredOrderPage(
                     onGoBack: () {
                       setState(() {
                         _currentPage = Page.activityLevelPage;
@@ -283,13 +283,11 @@ class ConfirmPage extends StatelessWidget {
                       children: List<OrderCard>.generate(
                           provider.orderNames.length, (index) {
                         return OrderCard(
-                            status: PortStatus.ok,
                             mealName: provider.orderNames[index]);
                       })),
                 )
               : const OrderCard(
                   width: 400,
-                  status: PortStatus.init,
                   mealName: '沒收到你的點餐，難道...吃空氣？');
         }),
         Row(
@@ -308,94 +306,6 @@ class ConfirmPage extends StatelessWidget {
         )
       ],
     );
-  }
-}
-
-class OrderPage extends StatelessWidget {
-  final void Function() onGoBack;
-  final void Function() onSubmit;
-
-  const OrderPage({super.key, required this.onGoBack, required this.onSubmit});
-  @override
-  Widget build(BuildContext context) {
-    List<OrderCard> getSerialStatusCards =
-        context.select<SerialPortsProvider, List<OrderCard>>((provider) {
-      provider.orderNames.clear();
-      List<MySerialPort> availableRFID =
-          provider.availablePorts.where((port) => port.rfid != '').toList();
-      return availableRFID.isNotEmpty
-          ? List<OrderCard>.generate(availableRFID.length, (index) {
-              debugPrint(
-                  'Processing Widget DeviceID=${availableRFID[index].deviceId}');
-              String mealId = availableRFID[index].rfid;
-              String mealName = idToMealName.containsKey(mealId)
-                  ? (idToMealName[mealId] ?? '黑暗料理')
-                  : '未知料理';
-              provider.orderNames.add(mealName);
-              return OrderCard(
-                status: availableRFID[index].status,
-                mealName: mealName,
-              );
-            })
-          : [
-              const OrderCard(
-                  width: 390,
-                  status: PortStatus.init,
-                  mealName: '沒收到您的點餐，是不知道要吃什麼嗎？可以請服務人員為您推薦！')
-            ];
-    });
-    return Column(
-        mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          const MyHeadLine('5.這是您點的餐：'),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
-            child: context.select<SerialPortsProvider, bool>((provider) =>
-                    provider.availablePorts
-                        .every((port) => port.status != PortStatus.updating))
-                ? Wrap(
-                    spacing: 8,
-                    direction: Axis.horizontal,
-                    alignment: WrapAlignment.center,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    children: getSerialStatusCards,
-                  )
-                : const CircularProgressIndicator.adaptive(),
-          ),
-
-          // Buttons
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              MySubmitButton(
-                onPressed: onGoBack,
-                label: '返回',
-              ),
-              const SizedBox(
-                width: 22,
-              ),
-              MySubmitButton(
-                onPressed: () async =>
-                    await context.read<SerialPortsProvider>().updatePorts(),
-                label: '重新感應',
-              ),
-              const SizedBox(
-                width: 22,
-              ),
-              MySubmitButton(
-                onPressed: () {
-                  context.read<DataProvider>().orderNames =
-                      context.read<SerialPortsProvider>().orderNames;
-                  onSubmit();
-                },
-                label: '確認',
-              )
-            ],
-          )
-        ]);
   }
 }
 
@@ -679,7 +589,7 @@ class _HomePageState extends State<HomePage> {
             setState(() {
               isStart = true;
             });
-            context.read<SerialPortsProvider>().updatePorts();
+            context.read<RFIDReaderProvider>().updateReaders();
             await Future.delayed(const Duration(seconds: 1));
             widget.onSubmit();
           },
@@ -840,13 +750,17 @@ class MyInfo extends StatelessWidget {
   }
 }
 
+// Simple OrderCard for ConfirmPage (not RFID status related)
 class OrderCard extends StatelessWidget {
   final String mealName;
-  final PortStatus status;
   final double? width;
 
-  const OrderCard(
-      {super.key, required this.status, required this.mealName, this.width});
+  const OrderCard({
+    super.key,
+    required this.mealName,
+    this.width,
+    Object? status, // Ignored, for compatibility
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -854,22 +768,7 @@ class OrderCard extends StatelessWidget {
       width: width ?? 280,
       child: Card(
         child: ListTile(
-          leading: switch (status) {
-            PortStatus.updating => Icon(
-                Icons.change_circle_outlined,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-            PortStatus.init => Icon(
-                Icons.help_outline,
-                color: Theme.of(context).colorScheme.primaryContainer,
-              ),
-            PortStatus.ok =>
-              const Icon(Icons.check_circle_outline, color: Colors.green),
-            PortStatus.error => Icon(
-                Icons.highlight_off,
-                color: Theme.of(context).colorScheme.error,
-              ),
-          },
+          leading: const Icon(Icons.restaurant_menu, color: Colors.green),
           title: Text(
             mealName,
             style: TextStyle(
