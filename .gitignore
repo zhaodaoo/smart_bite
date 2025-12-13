@@ -47,4 +47,5 @@ app.*.map.json
 .metadata
 pubspec.lock
 windows/ 
-linux
+linux/
+macos/
