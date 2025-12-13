@@ -506,7 +506,11 @@ class DataProvider extends ChangeNotifier {
                       child:
                           Container(color: Colors.blue.withValues(alpha: 0.0))),
                   PrintingBar(
-                      _intakeFoodTypeDailyProportion[NutritionType.grains]!
+                      (_intakeFoodTypeDailyProportion[NutritionType.grains]! >
+                                  100
+                              ? 100
+                              : _intakeFoodTypeDailyProportion[
+                                  NutritionType.grains]!)
                           .round(),
                       color: const Color.fromARGB(1, 236, 176, 30)),
                   SizedBox(
@@ -514,7 +518,10 @@ class DataProvider extends ChangeNotifier {
                       child:
                           Container(color: Colors.blue.withValues(alpha: 0.0))),
                   PrintingBar(
-                      _intakeFoodTypeDailyProportion[NutritionType.meat]!
+                      (_intakeFoodTypeDailyProportion[NutritionType.meat]! > 100
+                              ? 100
+                              : _intakeFoodTypeDailyProportion[
+                                  NutritionType.meat]!)
                           .round(),
                       color: const Color.fromARGB(1, 236, 176, 30)),
                   SizedBox(
@@ -522,7 +529,12 @@ class DataProvider extends ChangeNotifier {
                       child:
                           Container(color: Colors.blue.withValues(alpha: 0.0))),
                   PrintingBar(
-                      _intakeFoodTypeDailyProportion[NutritionType.vegetables]!
+                      (_intakeFoodTypeDailyProportion[
+                                      NutritionType.vegetables]! >
+                                  100
+                              ? 100
+                              : _intakeFoodTypeDailyProportion[
+                                  NutritionType.vegetables]!)
                           .round(),
                       color: const Color.fromARGB(1, 236, 176, 30)),
                   SizedBox(
@@ -530,7 +542,11 @@ class DataProvider extends ChangeNotifier {
                       child:
                           Container(color: Colors.blue.withValues(alpha: 0.0))),
                   PrintingBar(
-                      _intakeFoodTypeDailyProportion[NutritionType.fruits]!
+                      (_intakeFoodTypeDailyProportion[NutritionType.fruits]! >
+                                  100
+                              ? 100
+                              : _intakeFoodTypeDailyProportion[
+                                  NutritionType.fruits]!)
                           .round(),
                       color: const Color.fromARGB(1, 236, 176, 30)),
                   SizedBox(
@@ -538,7 +554,10 @@ class DataProvider extends ChangeNotifier {
                       child:
                           Container(color: Colors.blue.withValues(alpha: 0.0))),
                   PrintingBar(
-                      _intakeFoodTypeDailyProportion[NutritionType.oils]!
+                      (_intakeFoodTypeDailyProportion[NutritionType.oils]! > 100
+                              ? 100
+                              : _intakeFoodTypeDailyProportion[
+                                  NutritionType.oils]!)
                           .round(),
                       color: const Color.fromARGB(1, 236, 176, 30)),
                   SizedBox(
@@ -546,7 +565,11 @@ class DataProvider extends ChangeNotifier {
                       child:
                           Container(color: Colors.blue.withValues(alpha: 0.0))),
                   PrintingBar(
-                      _intakeFoodTypeDailyProportion[NutritionType.dairy]!
+                      (_intakeFoodTypeDailyProportion[NutritionType.dairy]! >
+                                  100
+                              ? 100
+                              : _intakeFoodTypeDailyProportion[
+                                  NutritionType.dairy]!)
                           .round(),
                       color: const Color.fromARGB(1, 236, 176, 30)),
                   SizedBox(
