@@ -25,7 +25,6 @@ class MyApp extends StatelessWidget {
         appBar: AppBar(title: Text(title)),
         body: PdfPreview(
           build: (format) => _generateMockLabelPdf(format),
-          initialPageFormat: PdfPageFormat.a4.landscape,
           dpi: 300,
         ),
       ),
@@ -33,6 +32,11 @@ class MyApp extends StatelessWidget {
   }
 
   Future<Uint8List> _generateMockReportPdf(PdfPageFormat format) async {
+    // 載入中文字體
+    final fontData = await rootBundle.load('assets/fonts/NotoSansCJK-Regular.otf');
+    final ttf = pw.Font.ttf(fontData);
+    const frameOpacity = 0.0;
+
     Widget myContainer = Container(
       decoration: const BoxDecoration(
         image: DecorationImage(
@@ -45,7 +49,7 @@ class MyApp extends StatelessWidget {
           SizedBox(
             height: 100,
             child: Container(
-              color: Colors.blue.withValues(alpha: 0.5),
+              color: Colors.blue.withValues(alpha: frameOpacity),
             ),
           ),
           Row(
@@ -55,7 +59,7 @@ class MyApp extends StatelessWidget {
                 width: 480,
                 height: 64,
                 child: Container(
-                  color: Colors.blue.withValues(alpha: 0.5),
+                  color: Colors.blue.withValues(alpha: frameOpacity),
                 ),
               ),
               Column(
@@ -69,7 +73,7 @@ class MyApp extends StatelessWidget {
                     height: 18,
                     width: 200,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.5),
+                      color: Colors.blue.withValues(alpha: frameOpacity),
                     ),
                   ),
                   const SizedBox(
@@ -79,7 +83,7 @@ class MyApp extends StatelessWidget {
                     height: 18,
                     width: 200,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.5),
+                      color: Colors.blue.withValues(alpha: frameOpacity),
                     ),
                   ),
                   const SizedBox(
@@ -89,7 +93,7 @@ class MyApp extends StatelessWidget {
                     height: 18,
                     width: 200,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.5),
+                      color: Colors.blue.withValues(alpha: frameOpacity),
                     ),
                   ),
                   const SizedBox(
@@ -101,7 +105,7 @@ class MyApp extends StatelessWidget {
                 width: 120,
                 height: 100,
                 child: Container(
-                  color: Colors.blue.withValues(alpha: 0.5),
+                  color: Colors.blue.withValues(alpha: frameOpacity),
                 ),
               ),
               Column(
@@ -111,13 +115,13 @@ class MyApp extends StatelessWidget {
                     width: 1160,
                     height: 56,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.5),
+                      color: Colors.blue.withValues(alpha: frameOpacity),
                     ),
                   ),
                   SizedBox(
                     width: 1160,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.5),
+                      color: Colors.blue.withValues(alpha: frameOpacity),
                       child: const Center(
                           child: NormalPrintingText(
                               '藜麥毛豆糙米菇菇雞炊飯、藜麥毛豆糙米菇菇雞炊飯、藜麥毛豆糙米菇菇雞炊飯、藜麥毛豆糙米菇菇雞炊飯、蒜香彩椒青花蓮藕片、蒜香彩椒青花蓮藕片、蒜香彩椒青花蓮藕片')),
@@ -129,7 +133,7 @@ class MyApp extends StatelessWidget {
                 width: 160,
                 height: 100,
                 child: Container(
-                  color: Colors.blue.withValues(alpha: 0.5),
+                  color: Colors.blue.withValues(alpha: frameOpacity),
                 ),
               ),
               Column(
@@ -139,13 +143,13 @@ class MyApp extends StatelessWidget {
                     width: 1160,
                     height: 56,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.5),
+                      color: Colors.blue.withValues(alpha: frameOpacity),
                     ),
                   ),
                   SizedBox(
                     width: 1160,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.5),
+                      color: Colors.blue.withValues(alpha: frameOpacity),
                       child: const NormalPrintingText(
                           '六大類食物都攝取到了，看看下方的圖表了解這餐吃的食物分析吧！'),
                     ),
@@ -157,7 +161,7 @@ class MyApp extends StatelessWidget {
           SizedBox(
             height: 18,
             child: Container(
-              color: Colors.blue.withValues(alpha: 0.5),
+              color: Colors.blue.withValues(alpha: frameOpacity),
             ),
           ),
           Row(
@@ -167,13 +171,13 @@ class MyApp extends StatelessWidget {
                 width: 720,
                 height: 50,
                 child: Container(
-                  color: Colors.blue.withValues(alpha: 0.5),
+                  color: Colors.blue.withValues(alpha: frameOpacity),
                 ),
               ),
               SizedBox(
                 width: 360,
                 child: Container(
-                  color: Colors.blue.withValues(alpha: 0.5),
+                  color: Colors.blue.withValues(alpha: frameOpacity),
                   child: const HighlightPrintingText('2050'),
                 ),
               ),
@@ -181,13 +185,13 @@ class MyApp extends StatelessWidget {
                 width: 560,
                 height: 50,
                 child: Container(
-                  color: Colors.blue.withValues(alpha: 0.5),
+                  color: Colors.blue.withValues(alpha: frameOpacity),
                 ),
               ),
               SizedBox(
                 width: 810,
                 child: Container(
-                  color: Colors.blue.withValues(alpha: 0.5),
+                  color: Colors.blue.withValues(alpha: frameOpacity),
                   child: const HighlightPrintingText('1800-1900'),
                 ),
               ),
@@ -196,7 +200,7 @@ class MyApp extends StatelessWidget {
           SizedBox(
             height: 136,
             child: Container(
-              color: Colors.blue.withValues(alpha: 0.5),
+              color: Colors.blue.withValues(alpha: frameOpacity),
             ),
           ),
           Row(
@@ -206,7 +210,7 @@ class MyApp extends StatelessWidget {
                 width: 454,
                 height: 40,
                 child: Container(
-                  color: Colors.blue.withValues(alpha: 0.5),
+                  color: Colors.blue.withValues(alpha: frameOpacity),
                 ),
               ),
               Column(
@@ -216,7 +220,7 @@ class MyApp extends StatelessWidget {
                     width: 100,
                     height: 132,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.5),
+                      color: Colors.blue.withValues(alpha: frameOpacity),
                       child: const SmallPrintingText('1.3'),
                     ),
                   ),
@@ -224,7 +228,7 @@ class MyApp extends StatelessWidget {
                     width: 100,
                     height: 132,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.5),
+                      color: Colors.blue.withValues(alpha: frameOpacity),
                       child: const SmallPrintingText('0.1'),
                     ),
                   ),
@@ -232,7 +236,7 @@ class MyApp extends StatelessWidget {
                     width: 100,
                     height: 132,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.5),
+                      color: Colors.blue.withValues(alpha: frameOpacity),
                       child: const SmallPrintingText('2.7'),
                     ),
                   ),
@@ -240,7 +244,7 @@ class MyApp extends StatelessWidget {
                     width: 100,
                     height: 132,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.5),
+                      color: Colors.blue.withValues(alpha: frameOpacity),
                       child: const SmallPrintingText('0.7'),
                     ),
                   ),
@@ -248,7 +252,7 @@ class MyApp extends StatelessWidget {
                     width: 100,
                     height: 132,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.5),
+                      color: Colors.blue.withValues(alpha: frameOpacity),
                       child: const SmallPrintingText('3.9'),
                     ),
                   ),
@@ -256,7 +260,7 @@ class MyApp extends StatelessWidget {
                     width: 100,
                     height: 132,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.5),
+                      color: Colors.blue.withValues(alpha: frameOpacity),
                       child: const SmallPrintingText('0.9'),
                     ),
                   ),
@@ -266,7 +270,7 @@ class MyApp extends StatelessWidget {
                 width: 254,
                 height: 50,
                 child: Container(
-                  color: Colors.blue.withValues(alpha: 0.5),
+                  color: Colors.blue.withValues(alpha: frameOpacity),
                 ),
               ),
               Column(
@@ -276,7 +280,7 @@ class MyApp extends StatelessWidget {
                   SizedBox(
                       height: 33,
                       child:
-                          Container(color: Colors.blue.withValues(alpha: 0.5))),
+                          Container(color: Colors.blue.withValues(alpha: frameOpacity))),
                   const PrintingBar(
                     100,
                     color: Color.fromARGB(1, 236, 176, 30),
@@ -284,7 +288,7 @@ class MyApp extends StatelessWidget {
                   SizedBox(
                       height: 66,
                       child:
-                          Container(color: Colors.blue.withValues(alpha: 0.5))),
+                          Container(color: Colors.blue.withValues(alpha: frameOpacity))),
                   const PrintingBar(
                     100,
                     color: Color.fromARGB(1, 219, 81, 115),
@@ -292,7 +296,7 @@ class MyApp extends StatelessWidget {
                   SizedBox(
                       height: 66,
                       child:
-                          Container(color: Colors.blue.withValues(alpha: 0.5))),
+                          Container(color: Colors.blue.withValues(alpha: frameOpacity))),
                   const PrintingBar(
                     100,
                     color: Color.fromARGB(1, 138, 185, 45),
@@ -300,7 +304,7 @@ class MyApp extends StatelessWidget {
                   SizedBox(
                       height: 66,
                       child:
-                          Container(color: Colors.blue.withValues(alpha: 0.5))),
+                          Container(color: Colors.blue.withValues(alpha: frameOpacity))),
                   const PrintingBar(
                     100,
                     color: Color.fromARGB(1, 219, 103, 18),
@@ -308,7 +312,7 @@ class MyApp extends StatelessWidget {
                   SizedBox(
                       height: 66,
                       child:
-                          Container(color: Colors.blue.withValues(alpha: 0.5))),
+                          Container(color: Colors.blue.withValues(alpha: frameOpacity))),
                   const PrintingBar(
                     100,
                     color: Color.fromARGB(1, 213, 180, 101),
@@ -316,7 +320,7 @@ class MyApp extends StatelessWidget {
                   SizedBox(
                       height: 66,
                       child:
-                          Container(color: Colors.blue.withValues(alpha: 0.5))),
+                          Container(color: Colors.blue.withValues(alpha: frameOpacity))),
                   const PrintingBar(
                     100,
                     color: Color.fromARGB(1, 147, 204, 233),
@@ -324,10 +328,10 @@ class MyApp extends StatelessWidget {
                   SizedBox(
                       height: 33,
                       child:
-                          Container(color: Colors.blue.withValues(alpha: 0.5))),
+                          Container(color: Colors.blue.withValues(alpha: frameOpacity))),
                 ],
               ),
-              // SizedBox(width: 70, height: 35, child: Container(color: Colors.blue.withValues(alpha: 0.5),),),
+              // SizedBox(width: 70, height: 35, child: Container(color: Colors.blue.withValues(alpha: frameOpacity),),),
               Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
@@ -335,7 +339,7 @@ class MyApp extends StatelessWidget {
                     width: 180,
                     height: 132,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.5),
+                      color: Colors.blue.withValues(alpha: frameOpacity),
                       child: const NormalPrintingText('66%'),
                     ),
                   ),
@@ -343,7 +347,7 @@ class MyApp extends StatelessWidget {
                     width: 180,
                     height: 132,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.5),
+                      color: Colors.blue.withValues(alpha: frameOpacity),
                       child: const NormalPrintingText('10%'),
                     ),
                   ),
@@ -351,7 +355,7 @@ class MyApp extends StatelessWidget {
                     width: 180,
                     height: 132,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.5),
+                      color: Colors.blue.withValues(alpha: frameOpacity),
                       child: const NormalPrintingText('88%'),
                     ),
                   ),
@@ -359,7 +363,7 @@ class MyApp extends StatelessWidget {
                     width: 180,
                     height: 132,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.5),
+                      color: Colors.blue.withValues(alpha: frameOpacity),
                       child: const NormalPrintingText('53%'),
                     ),
                   ),
@@ -367,7 +371,7 @@ class MyApp extends StatelessWidget {
                     width: 180,
                     height: 132,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.5),
+                      color: Colors.blue.withValues(alpha: frameOpacity),
                       child: const NormalPrintingText('77%'),
                     ),
                   ),
@@ -375,7 +379,7 @@ class MyApp extends StatelessWidget {
                     width: 180,
                     height: 132,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.5),
+                      color: Colors.blue.withValues(alpha: frameOpacity),
                       child: const NormalPrintingText('60%'),
                     ),
                   ),
@@ -385,7 +389,7 @@ class MyApp extends StatelessWidget {
                 width: 550,
                 height: 35,
                 child: Container(
-                  color: Colors.blue.withValues(alpha: 0.5),
+                  color: Colors.blue.withValues(alpha: frameOpacity),
                 ),
               ),
               Column(
@@ -395,7 +399,7 @@ class MyApp extends StatelessWidget {
                     width: 300,
                     height: 105,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.5),
+                      color: Colors.blue.withValues(alpha: frameOpacity),
                       child: const NormalPrintingText('1077.7'),
                     ),
                   ),
@@ -403,7 +407,7 @@ class MyApp extends StatelessWidget {
                     width: 300,
                     height: 105,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.5),
+                      color: Colors.blue.withValues(alpha: frameOpacity),
                       child: const NormalPrintingText('119.4'),
                     ),
                   ),
@@ -411,7 +415,7 @@ class MyApp extends StatelessWidget {
                     width: 300,
                     height: 105,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.5),
+                      color: Colors.blue.withValues(alpha: frameOpacity),
                       child: const NormalPrintingText('37.8'),
                     ),
                   ),
@@ -419,7 +423,7 @@ class MyApp extends StatelessWidget {
                     width: 300,
                     height: 105,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.5),
+                      color: Colors.blue.withValues(alpha: frameOpacity),
                       child: const NormalPrintingText('48.3'),
                     ),
                   ),
@@ -427,7 +431,7 @@ class MyApp extends StatelessWidget {
                     width: 300,
                     height: 105,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.5),
+                      color: Colors.blue.withValues(alpha: frameOpacity),
                       child: const NormalPrintingText('1620.6'),
                     ),
                   ),
@@ -435,7 +439,7 @@ class MyApp extends StatelessWidget {
                     width: 300,
                     height: 105,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.5),
+                      color: Colors.blue.withValues(alpha: frameOpacity),
                       child: const NormalPrintingText('725.4'),
                     ),
                   ),
@@ -443,7 +447,7 @@ class MyApp extends StatelessWidget {
                     width: 300,
                     height: 105,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.5),
+                      color: Colors.blue.withValues(alpha: frameOpacity),
                       child: const NormalPrintingText('11.9'),
                     ),
                   ),
@@ -454,7 +458,7 @@ class MyApp extends StatelessWidget {
           SizedBox(
             height: 192,
             child: Container(
-              color: Colors.blue.withValues(alpha: 0.5),
+              color: Colors.blue.withValues(alpha: frameOpacity),
             ),
           ),
           Row(
@@ -464,7 +468,7 @@ class MyApp extends StatelessWidget {
                 width: 592,
                 height: 50,
                 child: Container(
-                  color: Colors.blue.withValues(alpha: 0.5),
+                  color: Colors.blue.withValues(alpha: frameOpacity),
                 ),
               ),
               Column(
@@ -474,14 +478,14 @@ class MyApp extends StatelessWidget {
                     width: 64,
                     height: 4,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.5),
+                      color: Colors.blue.withValues(alpha: frameOpacity),
                     ),
                   ),
                   SizedBox(
                     width: 64,
                     height: 180,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.5),
+                      color: Colors.blue.withValues(alpha: frameOpacity),
                       child: const MidPrintingText('適量'),
                     ),
                   ),
@@ -489,14 +493,14 @@ class MyApp extends StatelessWidget {
                     width: 64,
                     height: 36,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.5),
+                      color: Colors.blue.withValues(alpha: frameOpacity),
                     ),
                   ),
                   SizedBox(
                     width: 64,
                     height: 180,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.5),
+                      color: Colors.blue.withValues(alpha: frameOpacity),
                       child: const MidPrintingText('不足'),
                     ),
                   ),
@@ -504,14 +508,14 @@ class MyApp extends StatelessWidget {
                     width: 64,
                     height: 36,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.5),
+                      color: Colors.blue.withValues(alpha: frameOpacity),
                     ),
                   ),
                   SizedBox(
                     width: 64,
                     height: 180,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.5),
+                      color: Colors.blue.withValues(alpha: frameOpacity),
                       child: const MidPrintingText('適量'),
                     ),
                   ),
@@ -521,7 +525,7 @@ class MyApp extends StatelessWidget {
                 width: 56,
                 height: 50,
                 child: Container(
-                  color: Colors.blue.withValues(alpha: 0.5),
+                  color: Colors.blue.withValues(alpha: frameOpacity),
                 ),
               ),
               Column(
@@ -531,7 +535,7 @@ class MyApp extends StatelessWidget {
                     width: 1000,
                     height: 180,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.5),
+                      color: Colors.blue.withValues(alpha: frameOpacity),
                       child: SmallPrintingText(commentsForFoodTypeByRank[
                           NutritionType.grains]![Rank.good]!),
                     ),
@@ -540,14 +544,14 @@ class MyApp extends StatelessWidget {
                     width: 50,
                     height: 36,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.5),
+                      color: Colors.blue.withValues(alpha: frameOpacity),
                     ),
                   ),
                   SizedBox(
                     width: 1000,
                     height: 180,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.5),
+                      color: Colors.blue.withValues(alpha: frameOpacity),
                       child: SmallPrintingText(commentsForFoodTypeByRank[
                           NutritionType.meat]![Rank.tooLess]!),
                     ),
@@ -556,14 +560,14 @@ class MyApp extends StatelessWidget {
                     width: 50,
                     height: 36,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.5),
+                      color: Colors.blue.withValues(alpha: frameOpacity),
                     ),
                   ),
                   SizedBox(
                     width: 1000,
                     height: 180,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.5),
+                      color: Colors.blue.withValues(alpha: frameOpacity),
                       child: SmallPrintingText(commentsForFoodTypeByRank[
                           NutritionType.vegetables]![Rank.good]!),
                     ),
@@ -574,7 +578,7 @@ class MyApp extends StatelessWidget {
                 width: 472,
                 height: 50,
                 child: Container(
-                  color: Colors.blue.withValues(alpha: 0.5),
+                  color: Colors.blue.withValues(alpha: frameOpacity),
                 ),
               ),
               Column(
@@ -584,14 +588,14 @@ class MyApp extends StatelessWidget {
                     width: 64,
                     height: 4,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.5),
+                      color: Colors.blue.withValues(alpha: frameOpacity),
                     ),
                   ),
                   SizedBox(
                     width: 64,
                     height: 180,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.5),
+                      color: Colors.blue.withValues(alpha: frameOpacity),
                       child: const MidPrintingText('適量'),
                     ),
                   ),
@@ -599,14 +603,14 @@ class MyApp extends StatelessWidget {
                     width: 64,
                     height: 36,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.5),
+                      color: Colors.blue.withValues(alpha: frameOpacity),
                     ),
                   ),
                   SizedBox(
                     width: 64,
                     height: 180,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.5),
+                      color: Colors.blue.withValues(alpha: frameOpacity),
                       child: const MidPrintingText('不足'),
                     ),
                   ),
@@ -614,14 +618,14 @@ class MyApp extends StatelessWidget {
                     width: 64,
                     height: 36,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.5),
+                      color: Colors.blue.withValues(alpha: frameOpacity),
                     ),
                   ),
                   SizedBox(
                     width: 64,
                     height: 180,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.5),
+                      color: Colors.blue.withValues(alpha: frameOpacity),
                       child: const MidPrintingText('適量'),
                     ),
                   ),
@@ -631,7 +635,7 @@ class MyApp extends StatelessWidget {
                 width: 60,
                 height: 50,
                 child: Container(
-                  color: Colors.blue.withValues(alpha: 0.5),
+                  color: Colors.blue.withValues(alpha: frameOpacity),
                 ),
               ),
               Column(
@@ -641,7 +645,7 @@ class MyApp extends StatelessWidget {
                     width: 1000,
                     height: 180,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.5),
+                      color: Colors.blue.withValues(alpha: frameOpacity),
                       child: SmallPrintingText(commentsForFoodTypeByRank[
                           NutritionType.fruits]![Rank.tooMuch]!),
                     ),
@@ -650,14 +654,14 @@ class MyApp extends StatelessWidget {
                     width: 50,
                     height: 36,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.5),
+                      color: Colors.blue.withValues(alpha: frameOpacity),
                     ),
                   ),
                   SizedBox(
                     width: 1000,
                     height: 180,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.5),
+                      color: Colors.blue.withValues(alpha: frameOpacity),
                       child: SmallPrintingText(commentsForFoodTypeByRank[
                           NutritionType.oils]![Rank.good]!),
                     ),
@@ -666,14 +670,14 @@ class MyApp extends StatelessWidget {
                     width: 50,
                     height: 36,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.5),
+                      color: Colors.blue.withValues(alpha: frameOpacity),
                     ),
                   ),
                   SizedBox(
                     width: 1000,
                     height: 180,
                     child: Container(
-                      color: Colors.blue.withValues(alpha: 0.5),
+                      color: Colors.blue.withValues(alpha: frameOpacity),
                       child: SmallPrintingText(commentsForFoodTypeByRank[
                           NutritionType.grains]![Rank.tooMuch]!),
                     ),
@@ -696,15 +700,17 @@ class MyApp extends StatelessWidget {
     final pdf = pw.Document();
     pdf.addPage(
       pw.Page(
+        orientation: pw.PageOrientation.landscape,
         pageFormat: format.copyWith(
             marginBottom: 0.3 * PdfPageFormat.cm,
             marginLeft: 0.3 * PdfPageFormat.cm,
             marginRight: 0.3 * PdfPageFormat.cm,
             marginTop: 0.3 * PdfPageFormat.cm),
+        theme: pw.ThemeData.withFont(base: ttf),
         build: (context) {
           return pw.Center(
-            child: pw.Image(
-              pw.MemoryImage(capturedImage),
+                  child: pw.Image(
+                    pw.MemoryImage(capturedImage),
               fit: pw.BoxFit.contain,
             ),
           );
@@ -716,6 +722,10 @@ class MyApp extends StatelessWidget {
 }
 
 Future<Uint8List> _generateMockLabelPdf(PdfPageFormat format) async {
+  // 載入中文字體
+  final fontData = await rootBundle.load('assets/fonts/NotoSansCJK-Regular.otf');
+  final ttf = pw.Font.ttf(fontData);
+  const frameOpacity = 0.0;
   Widget myContainer = Container(
     decoration: const BoxDecoration(
       image: DecorationImage(
@@ -728,7 +738,7 @@ Future<Uint8List> _generateMockLabelPdf(PdfPageFormat format) async {
         // Title hight
         SizedBox(
             height: 640,
-            child: Container(color: Colors.blue.withValues(alpha: 0.5))),
+            child: Container(color: Colors.blue.withValues(alpha: frameOpacity))),
         Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
@@ -736,52 +746,52 @@ Future<Uint8List> _generateMockLabelPdf(PdfPageFormat format) async {
             SizedBox(
                 width: 1000,
                 height: 5,
-                child: Container(color: Colors.blue.withValues(alpha: 0.5))),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                const SizedBox(
-                    height: 800,
-                    child: Align(alignment: Alignment.topLeft, child: NormalPrintingText('label_1_1_1_1_1_1_1_1_1_1_1_1\nlabel2\nlabel3\nlabel4\nlabel5\nlabel6\nlabel7'))),
-                // space between label group 1
-                SizedBox(
-                    height: 30,
-                    width: 740,
-                    child:
-                        Container(color: Colors.blue.withValues(alpha: 0.5))),
-              ],
-            ),
-            // Space between label 1 and 2
-            SizedBox(
-                width: 600,
-                height: 5,
-                child: Container(color: Colors.blue.withValues(alpha: 0.5))),
+                child: Container(color: Colors.blue.withValues(alpha: frameOpacity))),
             Column(
               mainAxisAlignment: MainAxisAlignment.start,
               mainAxisSize: MainAxisSize.max,
               children: [
                 const SizedBox(
                     height: 825,
-                    child: Align(alignment: Alignment.topLeft, child: NormalPrintingText('label_1_1_1_1_1_1_1_1_1_1_1_1\nlabel2\nlabel3\nlabel4\nlabel5\nlabel6\nlabel7\nlabel_9\nlabel_10'))),
+                    child: Align(alignment: Alignment.topLeft, child: NormalPrintingText('料理： 堅果地瓜濃湯\n追溯編號：1119478547778\n產品名稱：甘藷（地瓜）\n農產品經營者：地瓜王\n包裝日期：2025/10/31\n電話：037887888\n地址：苗栗縣後龍鎮地瓜段'))),
+                // space between label group 1
+                SizedBox(
+                    height: 5,
+                    width: 740,
+                    child:
+                        Container(color: Colors.blue.withValues(alpha: frameOpacity))),
+              ],
+            ),
+            // Space between label 1 and 2
+            SizedBox(
+                width: 600,
+                height: 5,
+                child: Container(color: Colors.blue.withValues(alpha: frameOpacity))),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                const SizedBox(
+                    height: 825,
+                    child: Align(alignment: Alignment.topLeft, child: NormalPrintingText('料理：牛奶\n標章編號：150666\n產品種類：鮮乳\n產品名稱：鮮乳\n產品類別：乳品\n廠商名稱：新鮮乳廠\n地址：桃園市大園區鮮乳路99號\n電話：0377775555\n負責人：牛奶鮮\n驗證機構：財團法人中央畜產會'))),
                 // space between label group 2
                 SizedBox(
                     height: 5,
-                    width: 1000,
+                    width: 1155,
                     child:
-                        Container(color: Colors.blue.withValues(alpha: 0.5))),
+                        Container(color: Colors.blue.withValues(alpha: frameOpacity))),
               ],
             ),
             SizedBox(
                 width: 5,
                 height: 830,
-                child: Container(color: Colors.blue.withValues(alpha: 0.5))),
+                child: Container(color: Colors.blue.withValues(alpha: frameOpacity))),
           ],
         ),
         // Space between row1 and row2
         SizedBox(
             height: 80,
-            child: Container(color: Colors.blue.withValues(alpha: 0.5))),
+            child: Container(color: Colors.blue.withValues(alpha: frameOpacity))),
         Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
@@ -789,46 +799,46 @@ Future<Uint8List> _generateMockLabelPdf(PdfPageFormat format) async {
             SizedBox(
                 width: 650,
                 height: 5,
-                child: Container(color: Colors.blue.withValues(alpha: 0.5))),
+                child: Container(color: Colors.blue.withValues(alpha: frameOpacity))),
             Column(
               mainAxisAlignment: MainAxisAlignment.start,
               mainAxisSize: MainAxisSize.max,
               children: [
                 const SizedBox(
                     height: 800,
-                    child: Center(child: NormalPrintingText('label_1_1_1_1_1_1_1_1_1_1_1_1\nlabel2\nlabel3\nlabel4\nlabel5\nlabel6\nlabel7\nlabel_9\nlabel_10'))),
+                    child: Center(child: NormalPrintingText('料理：鮮菇莧菜\n品項：短期葉菜 \n產品範圍：莧菜(含綠莧、白莧、紅莧)\n農產品經營者：葉菜成（葉菜有機農場）\n驗證機構名稱：國立中興大學\n證書字號(有機)：1-006-575702\n驗證效期：2026/10/10\n電話：091777777\n驗證場所地址(有機)：\n雲林縣莿桐鄉蔬菜段5757-0000地號'))),
                 // space between label group 3
                 SizedBox(
                     height: 30,
                     width: 1100,
                     child:
-                        Container(color: Colors.blue.withValues(alpha: 0.5))),
+                        Container(color: Colors.blue.withValues(alpha: frameOpacity))),
               ],
             ),
             // Space between label 3 and 4
             SizedBox(
                 width: 550,
                 height: 5,
-                child: Container(color: Colors.blue.withValues(alpha: 0.5))),
+                child: Container(color: Colors.blue.withValues(alpha: frameOpacity))),
             Column(
               mainAxisAlignment: MainAxisAlignment.start,
               mainAxisSize: MainAxisSize.max,
               children: [
                 const SizedBox(
                     height: 800,
-                    child: Center(child: NormalPrintingText('label_4_1'))),
+                    child: Center(child: NormalPrintingText('料理：葡萄\n追溯編號：095279527\n品名：葡萄\n生產者：呂葡萄-葡萄公主莊園\n電話：048889527\n地址：臺中市新社區\n簡介：獲得家鄉葡萄公主的殊榮，傳承父執\n輩高品質的種植技術，分享大家。'))),
                 // space between label group 4
                 SizedBox(
                     height: 30,
-                    width: 1100,
+                    width: 1200,
                     child:
-                        Container(color: Colors.blue.withValues(alpha: 0.5))),
+                        Container(color: Colors.blue.withValues(alpha: frameOpacity))),
               ],
             ),
              SizedBox(
                 width: 5,
                 height: 830,
-                child: Container(color: Colors.blue.withValues(alpha: 0.5))),
+                child: Container(color: Colors.blue.withValues(alpha: frameOpacity))),
           ],
         ),
       ],
@@ -844,6 +854,7 @@ Future<Uint8List> _generateMockLabelPdf(PdfPageFormat format) async {
   final pdf = pw.Document();
   pdf.addPage(
     pw.Page(
+      orientation: pw.PageOrientation.landscape,
       pageFormat: format.copyWith(
           marginBottom: 0.3 * PdfPageFormat.cm,
           marginLeft: 0.3 * PdfPageFormat.cm,
@@ -871,7 +882,10 @@ class NormalPrintingText extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
         child: Text(text,
-            style: const TextStyle(fontSize: 46, color: Colors.red)));
+            style: const TextStyle(
+                fontSize: 46,
+                color: Colors.red,
+                fontFamily: 'NotoSansCJK')));
   }
 }
 
@@ -882,9 +896,13 @@ class HighlightPrintingText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
+    return Align(
+        alignment: Alignment.topLeft,
         child: Text(text,
-            style: const TextStyle(fontSize: 120, color: Colors.red)));
+            style: const TextStyle(
+                fontSize: 120,
+                color: Colors.red,
+                fontFamily: 'NotoSansCJK')));
   }
 }
 
@@ -897,7 +915,10 @@ class SmallPrintingText extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
         child: Text(text,
-            style: const TextStyle(fontSize: 40, color: Colors.red)));
+            style: const TextStyle(
+                fontSize: 40,
+                color: Colors.red,
+                fontFamily: 'NotoSansCJK')));
   }
 }
 
@@ -910,7 +931,10 @@ class MidPrintingText extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
         child: Text(text,
-            style: const TextStyle(fontSize: 56, color: Colors.red)));
+            style: const TextStyle(
+                fontSize: 56,
+                color: Colors.red,
+                fontFamily: 'NotoSansCJK')));
   }
 }
 
@@ -933,7 +957,7 @@ class PrintingBar extends StatelessWidget {
         SizedBox(
           width: 1222.0 * (1.0 - percent / 100.0),
           height: 66,
-          child: Container(color: Colors.blue.withValues(alpha: 0.5)),
+          child: Container(color: Colors.blue.withValues(alpha: 0.7)),
         ),
       ],
     );

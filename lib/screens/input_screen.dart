@@ -144,6 +144,7 @@ class _InputScreenState extends State<InputScreen> {
                               // ignore: use_build_context_synchronously
                               url: context.read<DataProvider>().printerName),
                           format: PdfPageFormat.a4.landscape,
+                          usePrinterSettings: true,
                           onLayout: (format) => context
                               .read<DataProvider>()
                               .generateReportPdf(format));
@@ -154,6 +155,7 @@ class _InputScreenState extends State<InputScreen> {
                               // ignore: use_build_context_synchronously
                               url: context.read<DataProvider>().printerName),
                           format: PdfPageFormat.a4.landscape,
+                          usePrinterSettings: true,
                           onLayout: (format) => context
                               .read<DataProvider>()
                               .generateLabelPdf(format));
