@@ -110,7 +110,7 @@ class GPIOSPIRFIDReaderManager extends ChangeNotifier implements RFIDReaderManag
           .toList();
       
       // Perform button-triggered reading using proven implementation
-      final tagIds = await _pollingService.performTwoLoopCycles(readerConfigs);
+      final tagIds = await _pollingService.performOneLoopCycles(readerConfigs);
       
       debugPrint('Scan complete. Found ${tagIds.length} unique tags: $tagIds');
       

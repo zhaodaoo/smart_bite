@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 import '../models/rfid_models.dart';
 import 'simple_mfrc522.dart';
 
@@ -5,7 +7,7 @@ import 'simple_mfrc522.dart';
 class RFIDPollingService {
   /// Perform one reading cycle through all readers
   /// Collects unique tag IDs and returns them as a list
-  Future<List<String>> performTwoLoopCycles(List<ReaderConfig> configs) async {
+  Future<List<String>> performOneLoopCycles(List<ReaderConfig> configs) async {
     final Set<String> uniqueTags = {};
     final List<SimpleMFRC522> readers = [];
     
@@ -20,8 +22,7 @@ class RFIDPollingService {
       }
       
       // Run 1 complete cycle through all readers
-      for (int cycle = 0; cycle < 1; cycle++) {
-        for (var reader in readers) {
+      for (var reader in readers) {
           try {
             // Attempt to read tag ID
             final tagId = await reader.readIdNoBlock();
@@ -32,17 +33,17 @@ class RFIDPollingService {
             }
           } catch (e) {
             // Log error but continue to next reader
-            print('Error reading reader ${reader.deviceNum} in cycle ${cycle + 1}: $e');
+            debugPrint('Error reading reader ${reader.deviceNum}');
           }
         }
-      }
+
     } finally {
       // Final cleanup - dispose all readers to release GPIO pins
       for (var reader in readers) {
         try {
           await reader.dispose();
         } catch (e) {
-          print('Error disposing reader ${reader.deviceNum}: $e');
+          debugPrint('Error disposing reader ${reader.deviceNum}: $e');
         }
       }
       

@@ -57,7 +57,7 @@ MFRC522.anticoll()
     ↓ (List<int> uid)
 SimpleMFRC522._uidToHex()
     ↓ (String hex)
-RFIDPollingService.performTwoLoopCycles()
+RFIDPollingService.performOneLoopCycles()
     ↓ (List<String> tagIds)
 GPIOSPIRFIDReaderManager.scanAll()
     ↓ (List<RFIDReading>)
@@ -141,7 +141,7 @@ All tests verify:
    - Changed `readIdNoBlock()` return type from `Future<int?>` to `Future<String?>`
 
 2. `lib/services/rfid_polling_service.dart`
-   - Changed `performTwoLoopCycles()` return type from `Future<List<int>>` to `Future<List<String>>`
+   - Changed `performOneLoopCycles()` return type from `Future<List<int>>` to `Future<List<String>>`
    - Updated internal set type from `Set<int>` to `Set<String>`
 
 3. `lib/adapters/gpio_spi_rfid_adapter.dart`

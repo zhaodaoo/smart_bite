@@ -122,7 +122,7 @@ await provider.updateReaders();
 
 // Get identified meals
 List<String> meals = provider.orderNames;
-print('Detected meals: $meals');
+debugPrint('Detected meals: $meals');
 ```
 
 ### Mock Testing
