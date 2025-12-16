@@ -1,0 +1,100 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:smart_bite/data/constant.dart';
+
+/// Service responsible for persisting analysis data to files.
+/// Separated from UI/state management for better testability and maintainability.
+class DataPersistenceService {
+  /// Saves nutrition analysis data to a CSV file.
+  ///
+  /// Throws [DataPersistenceException] if file operations fail.
+  static Future<void> saveAnalysisData({
+    required Age age,
+    required Sex sex,
+    required ActivityLevel activityLevel,
+    required List<String> orderNames,
+    required String overallComment,
+    required Map<NutritionType, double> intakeFoodType,
+    required Map<NutritionType, double> intakeFoodTypeDailyProportion,
+    required Map<NutritionType, String> ranksByFoodType,
+  }) async {
+    try {
+      final file = await _getLocalFile();
+      var dateUtc = DateTime.now().toUtc();
+      var dateLocal = dateUtc.toLocal();
+      String outputString =
+          '$dateLocal, ${getAgeLabel(age)}, ${getSexLabel(sex)}, ${getActivityLevelLabel(activityLevel)}, ${orderNames.join(',')}, "$overallComment", "$intakeFoodType", "$intakeFoodTypeDailyProportion", "$ranksByFoodType"\r\n';
+      debugPrint('outputString = $outputString');
+
+      if (await file.exists()) {
+        await file.writeAsString(outputString, mode: FileMode.append);
+      } else {
+        await file.writeAsString(outputString);
+      }
+      await file.writeAsString(Platform.lineTerminator, mode: FileMode.append);
+
+      debugPrint('Data saved successfully to ${file.path}');
+    } catch (e) {
+      debugPrint('Error saving data: $e');
+      throw DataPersistenceException('Failed to save data: ${e.toString()}');
+    }
+  }
+
+  /// Gets the local path for application documents.
+  static Future<String> _getLocalPath() async {
+    final directory = await getApplicationDocumentsDirectory();
+    return directory.path;
+  }
+
+  /// Gets the local file for saving data.
+  static Future<File> _getLocalFile() async {
+    final path = await _getLocalPath();
+    debugPrint('Data will be saved under "$path"');
+    return File('$path/data.csv');
+  }
+
+  /// Reads all saved data from the CSV file.
+  ///
+  /// Returns an empty list if file doesn't exist.
+  /// Throws [DataPersistenceException] if reading fails.
+  static Future<List<String>> readAllData() async {
+    try {
+      final file = await _getLocalFile();
+      if (await file.exists()) {
+        return await file.readAsLines();
+      }
+      return [];
+    } catch (e) {
+      debugPrint('Error reading data: $e');
+      throw DataPersistenceException('Failed to read data: ${e.toString()}');
+    }
+  }
+
+  /// Deletes the data file.
+  ///
+  /// Throws [DataPersistenceException] if deletion fails.
+  static Future<void> deleteData() async {
+    try {
+      final file = await _getLocalFile();
+      if (await file.exists()) {
+        await file.delete();
+        debugPrint('Data file deleted successfully');
+      }
+    } catch (e) {
+      debugPrint('Error deleting data: $e');
+      throw DataPersistenceException('Failed to delete data: ${e.toString()}');
+    }
+  }
+}
+
+/// Exception thrown when data persistence operations fail.
+class DataPersistenceException implements Exception {
+  final String message;
+
+  DataPersistenceException(this.message);
+
+  @override
+  String toString() => 'DataPersistenceException: $message';
+}
