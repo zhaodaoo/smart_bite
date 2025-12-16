@@ -8,7 +8,7 @@ void main() {
       final adapter = MockRFIDAdapter(
         deviceId: '01',
         mockRfidSequence: ['A22038F6'],
-        scanDelay: Duration(milliseconds: 10),
+        scanDelay: const Duration(milliseconds: 10),
       );
 
       await adapter.connect();
@@ -24,7 +24,7 @@ void main() {
       final adapter = MockRFIDAdapter(
         deviceId: '02',
         mockRfidSequence: [],
-        scanDelay: Duration(milliseconds: 10),
+        scanDelay: const Duration(milliseconds: 10),
       );
 
       await adapter.connect();
@@ -40,7 +40,7 @@ void main() {
       final adapter = MockRFIDAdapter(
         deviceId: '03',
         mockRfidSequence: ['RFID001', 'RFID002', 'RFID003'],
-        scanDelay: Duration(milliseconds: 10),
+        scanDelay: const Duration(milliseconds: 10),
       );
 
       await adapter.connect();

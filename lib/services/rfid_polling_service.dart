@@ -5,8 +5,8 @@ import 'simple_mfrc522.dart';
 class RFIDPollingService {
   /// Perform one reading cycle through all readers
   /// Collects unique tag IDs and returns them as a list
-  Future<List<int>> performTwoLoopCycles(List<ReaderConfig> configs) async {
-    final Set<int> uniqueTags = {};
+  Future<List<String>> performTwoLoopCycles(List<ReaderConfig> configs) async {
+    final Set<String> uniqueTags = {};
     final List<SimpleMFRC522> readers = [];
     
     try {

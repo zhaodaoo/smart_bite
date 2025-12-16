@@ -15,7 +15,7 @@ import 'package:smart_bite/data/dishes_label.dart';
 import 'package:smart_bite/data/dailyneeds_for_under_fifteen.dart';
 
 class DataProvider extends ChangeNotifier {
-  String _printerName = 'Brother DCP-T426W';
+  String _printerName = 'DCPT426W';
   Meal _meal = Meal.lunch;
   ActivityLevel _activityLevel = ActivityLevel.miderate;
   Sex _sex = Sex.female;
@@ -306,7 +306,7 @@ class DataProvider extends ChangeNotifier {
     Widget myContainer = Container(
       decoration: const BoxDecoration(
         image: DecorationImage(
-          image: AssetImage("assets/images/printing_layout.png"),
+          image: AssetImage("assets/images/printing_layout_1.png"),
           fit: BoxFit.contain,
         ),
       ),

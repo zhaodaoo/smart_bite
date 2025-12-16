@@ -9,7 +9,7 @@ class SimpleMFRC522 {
   final int rstPin;
   
   MFRC522? _reader;
-  int? _tagId;
+  String? _tagId;
   late GPIO _rstGpio;
 
   SimpleMFRC522({
@@ -22,7 +22,7 @@ class SimpleMFRC522 {
     _rstGpio = GPIO(rstPin, GPIOdirection.gpioDirOut);
   }
 
-  int? get tagId => _tagId;
+  String? get tagId => _tagId;
 
   /// Initialize the RFID reader
   Future<void> initReader() async {
@@ -47,7 +47,7 @@ class SimpleMFRC522 {
   }
 
   /// Read tag ID in non-blocking mode
-  Future<int?> readIdNoBlock() async {
+  Future<String?> readIdNoBlock() async {
     try {
       await initReader();
 
@@ -66,7 +66,7 @@ class SimpleMFRC522 {
       }
 
       await resetReader();
-      _tagId = _uidToNum(anticollResult.uid);
+      _tagId = _uidToHex(anticollResult.uid);
       return _tagId;
     } catch (e) {
       await resetReader();
@@ -74,13 +74,17 @@ class SimpleMFRC522 {
     }
   }
 
-  /// Convert UID bytes to numeric ID
-  int _uidToNum(List<int> uid) {
-    int n = 0;
-    for (int i = 0; i < 5 && i < uid.length; i++) {
-      n = n * 256 + uid[i];
+  /// Convert UID bytes to hex string (matching Arduino printHex behavior)
+  /// Converts first 4 bytes of UID to 8-character uppercase hex string
+  /// Example: [0xA2, 0x20, 0x38, 0xF6] -> "A22038F6"
+  String _uidToHex(List<int> uid) {
+    final buffer = StringBuffer();
+    // Use first 4 bytes to create 8-character hex string
+    for (int i = 0; i < 4 && i < uid.length; i++) {
+      // Convert each byte to 2-character hex with leading zero if needed
+      buffer.write(uid[i].toRadixString(16).toUpperCase().padLeft(2, '0'));
     }
-    return n;
+    return buffer.toString();
   }
 
   /// Dispose resources

@@ -121,7 +121,6 @@ class GPIOSPIRFIDReaderManager extends ChangeNotifier implements RFIDReaderManag
       // Create readings for each configured reader
       for (int i = 0; i < _configs.length; i++) {
         final config = _configs[i];
-        final deviceNum = i + 1;
         
         // Check if this reader detected a tag
         // Note: We don't know which specific reader detected which tag,
@@ -131,7 +130,7 @@ class GPIOSPIRFIDReaderManager extends ChangeNotifier implements RFIDReaderManag
         final reading = hasTag
             ? RFIDReading.success(
                 config.deviceId,
-                _tagIdToHex(tagIds[i]),
+                tagIds[i],  // Already in hex format from SimpleMFRC522
               )
             : RFIDReading(
                 deviceId: config.deviceId,
@@ -175,12 +174,6 @@ class GPIOSPIRFIDReaderManager extends ChangeNotifier implements RFIDReaderManag
     return _latestReadings.values
         .where((reading) => reading.hasCard)
         .toList();
-  }
-
-  /// Convert numeric tag ID to 8-character hex string
-  String _tagIdToHex(int tagId) {
-    // Convert to hex, pad to 8 characters
-    return tagId.toRadixString(16).toUpperCase().padLeft(8, '0');
   }
 
   @override

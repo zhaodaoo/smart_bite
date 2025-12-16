@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     precacheImage(
-        const AssetImage('assets/images/printing_layout.png'), context);
+        const AssetImage('assets/images/printing_layout_2.png'), context);
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: Text(title)),
@@ -734,7 +734,7 @@ Future<Uint8List> _generateMockLabelPdf(PdfPageFormat format) async {
           children: [
             // Padding from left group 1
             SizedBox(
-                width: 1200,
+                width: 1000,
                 height: 5,
                 child: Container(color: Colors.blue.withValues(alpha: 0.5))),
             Column(
@@ -742,28 +742,19 @@ Future<Uint8List> _generateMockLabelPdf(PdfPageFormat format) async {
               mainAxisSize: MainAxisSize.max,
               children: [
                 const SizedBox(
-                    height: 90,
-                    child: Center(child: NormalPrintingText('label_1_1'))),
+                    height: 800,
+                    child: Align(alignment: Alignment.topLeft, child: NormalPrintingText('label_1_1_1_1_1_1_1_1_1_1_1_1\nlabel2\nlabel3\nlabel4\nlabel5\nlabel6\nlabel7'))),
                 // space between label group 1
                 SizedBox(
-                    height: 40,
-                    width: 460,
-                    child:
-                        Container(color: Colors.blue.withValues(alpha: 0.5))),
-                const SizedBox(
-                    height: 90,
-                    child: Center(child: NormalPrintingText('label_1_2'))),
-                // space under label1 1-2
-                SizedBox(
-                    height: 120,
-                    width: 460,
+                    height: 30,
+                    width: 740,
                     child:
                         Container(color: Colors.blue.withValues(alpha: 0.5))),
               ],
             ),
             // Space between label 1 and 2
             SizedBox(
-                width: 820,
+                width: 600,
                 height: 5,
                 child: Container(color: Colors.blue.withValues(alpha: 0.5))),
             Column(
@@ -771,31 +762,32 @@ Future<Uint8List> _generateMockLabelPdf(PdfPageFormat format) async {
               mainAxisSize: MainAxisSize.max,
               children: [
                 const SizedBox(
-                    height: 90,
-                    child: Center(child: NormalPrintingText('label_2_1'))),
+                    height: 825,
+                    child: Align(alignment: Alignment.topLeft, child: NormalPrintingText('label_1_1_1_1_1_1_1_1_1_1_1_1\nlabel2\nlabel3\nlabel4\nlabel5\nlabel6\nlabel7\nlabel_9\nlabel_10'))),
                 // space between label group 2
                 SizedBox(
-                    height: 160,
-                    width: 460,
+                    height: 5,
+                    width: 1000,
                     child:
                         Container(color: Colors.blue.withValues(alpha: 0.5))),
-                const SizedBox(
-                    height: 90,
-                    child: Center(child: NormalPrintingText('label_2_2'))),
               ],
             ),
+            SizedBox(
+                width: 5,
+                height: 830,
+                child: Container(color: Colors.blue.withValues(alpha: 0.5))),
           ],
         ),
         // Space between row1 and row2
         SizedBox(
-            height: 540,
+            height: 80,
             child: Container(color: Colors.blue.withValues(alpha: 0.5))),
         Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             // Padding from left group 2
             SizedBox(
-                width: 877,
+                width: 650,
                 height: 5,
                 child: Container(color: Colors.blue.withValues(alpha: 0.5))),
             Column(
@@ -803,28 +795,19 @@ Future<Uint8List> _generateMockLabelPdf(PdfPageFormat format) async {
               mainAxisSize: MainAxisSize.max,
               children: [
                 const SizedBox(
-                    height: 90,
-                    child: Center(child: NormalPrintingText('label_3_1'))),
+                    height: 800,
+                    child: Center(child: NormalPrintingText('label_1_1_1_1_1_1_1_1_1_1_1_1\nlabel2\nlabel3\nlabel4\nlabel5\nlabel6\nlabel7\nlabel_9\nlabel_10'))),
                 // space between label group 3
                 SizedBox(
-                    height: 35,
-                    width: 460,
-                    child:
-                        Container(color: Colors.blue.withValues(alpha: 0.5))),
-                const SizedBox(
-                    height: 90,
-                    child: Center(child: NormalPrintingText('label_3_2'))),
-                // space under label1 1-2
-                SizedBox(
-                    height: 100,
-                    width: 460,
+                    height: 30,
+                    width: 1100,
                     child:
                         Container(color: Colors.blue.withValues(alpha: 0.5))),
               ],
             ),
             // Space between label 3 and 4
             SizedBox(
-                width: 1140,
+                width: 550,
                 height: 5,
                 child: Container(color: Colors.blue.withValues(alpha: 0.5))),
             Column(
@@ -832,19 +815,20 @@ Future<Uint8List> _generateMockLabelPdf(PdfPageFormat format) async {
               mainAxisSize: MainAxisSize.max,
               children: [
                 const SizedBox(
-                    height: 90,
+                    height: 800,
                     child: Center(child: NormalPrintingText('label_4_1'))),
                 // space between label group 4
                 SizedBox(
-                    height: 140,
-                    width: 460,
+                    height: 30,
+                    width: 1100,
                     child:
                         Container(color: Colors.blue.withValues(alpha: 0.5))),
-                const SizedBox(
-                    height: 90,
-                    child: Center(child: NormalPrintingText('label_4_1'))),
               ],
             ),
+             SizedBox(
+                width: 5,
+                height: 830,
+                child: Container(color: Colors.blue.withValues(alpha: 0.5))),
           ],
         ),
       ],
