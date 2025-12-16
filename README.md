@@ -8,7 +8,7 @@ The application is a **nutritional analysis and meal planning tool** that:
 - Calculates daily nutritional needs based on age groups
 - Analyzes dish compositions and labels
 - Generates printable nutrition reports
-- Interfaces with hardware via serial port communication
+- Interfaces with RFID hardware via GPIO/SPI on Raspberry Pi
 
 ## 🏗️ Project Structure
 
@@ -17,6 +17,9 @@ The application is a **nutritional analysis and meal planning tool** that:
 ```
 lib/
 ├── main.dart                    # Entry point
+├── adapters/                    # Hardware adapters
+│   ├── gpio_spi_rfid_adapter.dart  # GPIO/SPI RFID reader (Raspberry Pi)
+│   └── mock_rfid_adapter.dart      # Mock adapter for testing
 ├── data/                        # Data layer (constants & mappings)
 │   ├── comments.dart            # Nutrition/meal comments
 │   ├── constant.dart            # App constants
@@ -24,15 +27,31 @@ lib/
 │   ├── dailyneeds_for_under_fifteen.dart   # Youth nutrition requirements
 │   ├── dishes_info.dart         # Dish/meal information database
 │   ├── dishes_label.dart        # Categorization/labels for dishes
-│   └── id_to_meal.dart          # Meal ID mapping
+│   ├── id_to_meal.dart          # Meal ID mapping
+│   └── three_label_one_code.dart
+├── interfaces/                  # Abstract interfaces
+│   └── rfid_reader.dart         # RFID reader interface
+├── models/                      # Data models
+│   └── rfid_models.dart         # RFID data structures
 ├── provider/                    # State management (Provider pattern)
 │   ├── data_provider.dart       # App data state
-│   └── serial_provider.dart     # Serial port communication state
-└── screens/                     # UI layer
-    ├── input_screen.dart        # User input interface
-    ├── loading_screen.dart      # Loading/splash screen
-    ├── printing_preview.dart    # Print preview for reports
-    └── setting_screen.dart      # App configuration
+│   └── rfid_reader_provider.dart # RFID reader state management
+├── screens/                     # UI layer
+│   ├── input_screen.dart        # User input interface
+│   ├── loading_screen.dart      # Loading/splash screen
+│   ├── printing_preview.dart    # Print preview for reports
+│   └── setting_screen.dart      # App configuration
+├── services/                    # Business logic services
+│   ├── meal_identification_service.dart  # Meal identification
+│   ├── mfrc522_constants.dart            # MFRC522 register definitions
+│   ├── mfrc522.dart                       # MFRC522 driver
+│   ├── rfid_polling_service.dart         # RFID polling logic
+│   └── simple_mfrc522.dart               # Simplified MFRC522 interface
+├── utils/                       # Utilities
+│   └── platform_detector.dart   # Platform detection
+└── widgets/                     # Reusable widgets
+    ├── refactored_order_page.dart
+    └── refactored_setting_page.dart
 ```
 
 ### **Assets**
@@ -47,7 +66,7 @@ lib/
 | Package | Purpose |
 |---------|---------|
 | `provider` | State management (MVVM pattern) |
-| `flutter_libserialport` | Serial port hardware communication |
+| `dart_periphery` | GPIO/SPI hardware communication on Linux |
 | `window_manager` | Desktop window control |
 | `pdf` | PDF generation for reports |
 | `printing` | Print functionality |
@@ -58,7 +77,7 @@ lib/
 ### **Platform**
 
 - **SDK**: Dart 3.5.1+
-- **Target**: Desktop application (Windows/macOS/Linux)
+- **Target**: Raspberry Pi (Linux ARM) with GPIO/SPI support
 - **UI Framework**: Flutter with Material Design
 
 ## 🎨 Design Patterns
@@ -66,8 +85,8 @@ lib/
 ### **1. Provider Pattern (State Management)**
 ```dart
 provider/
-├── data_provider.dart      # Business logic & app state
-└── serial_provider.dart    # Hardware communication state
+├── data_provider.dart          # Business logic & app state
+└── rfid_reader_provider.dart   # RFID hardware communication state
 ```
 
 The app uses the **Provider** pattern for:
@@ -84,6 +103,11 @@ The app uses the **Provider** pattern for:
        │
 ┌──────▼──────┐
 │  Providers  │ ◄── Business Logic Layer
+└──────┬──────┘
+       │
+┌──────▼──────┐
+│ Adapters/   │ ◄── Hardware Abstraction Layer
+│ Services    │
 └──────┬──────┘
        │
 ┌──────▼──────┐

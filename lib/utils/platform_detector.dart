@@ -9,16 +9,12 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import '../interfaces/rfid_reader.dart';
-import '../adapters/serial_rfid_adapter.dart';
 import '../adapters/gpio_spi_rfid_adapter.dart';
 import '../adapters/mock_rfid_adapter.dart';
 
 enum PlatformType {
-  /// Raspberry Pi (Linux on ARM)
+  /// Raspberry Pi (Linux on ARM) with GPIO/SPI
   raspberryPi,
-  
-  /// Desktop with serial ports (Windows, macOS, Linux x86)
-  desktop,
   
   /// Mock for testing
   mock,
@@ -44,11 +40,6 @@ class PlatformDetector {
       if (_isRaspberryPi()) {
         return PlatformType.raspberryPi;
       }
-    }
-
-    // Windows, macOS, or Linux x86 with serial support
-    if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
-      return PlatformType.desktop;
     }
 
     return PlatformType.unknown;
@@ -82,8 +73,6 @@ class PlatformDetector {
     switch (platform) {
       case PlatformType.raspberryPi:
         return 'Raspberry Pi (GPIO/SPI)';
-      case PlatformType.desktop:
-        return 'Desktop (USB Serial)';
       case PlatformType.mock:
         return 'Mock (Testing)';
       case PlatformType.unknown:
@@ -110,9 +99,6 @@ class RFIDReaderFactory {
       case PlatformType.raspberryPi:
         return _createGPIOReaderManager();
         
-      case PlatformType.desktop:
-        return _createSerialReaderManager();
-        
       case PlatformType.mock:
         return _createMockReaderManager(mockScenario);
         
@@ -120,12 +106,6 @@ class RFIDReaderFactory {
         debugPrint('Unknown platform, falling back to mock readers');
         return _createMockReaderManager(mockScenario);
     }
-  }
-
-  /// Create Serial RFID reader manager (Arduino + USB)
-  static RFIDReaderManager _createSerialReaderManager() {
-    debugPrint('Initializing Serial RFID readers');
-    return SerialRFIDReaderManager();
   }
 
   /// Create GPIO/SPI RFID reader manager (Raspberry Pi)

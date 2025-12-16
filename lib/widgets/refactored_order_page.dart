@@ -1,7 +1,7 @@
 /// Refactored Order Page Widget
 /// 
-/// Uses the new abstracted RFIDReaderProvider instead of SerialPortsProvider.
-/// This widget demonstrates the migration to hardware-agnostic RFID reading.
+/// Uses the abstracted RFIDReaderProvider for hardware-agnostic RFID reading.
+/// This widget demonstrates the GPIO/SPI-based RFID implementation.
 library;
 
 import 'package:flutter/material.dart';

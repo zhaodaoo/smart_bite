@@ -1,11 +1,10 @@
 /// RFID Reader Provider
 /// 
 /// Abstracted provider that manages RFID readers independently of the hardware implementation.
-/// Replaces SerialPortsProvider with a hardware-agnostic interface.
+/// Provides a hardware-agnostic interface for RFID reading.
 /// 
 /// Supports multiple reader implementations:
-/// - Serial (Arduino + USB)
-/// - GPIO/SPI (Raspberry Pi)
+/// - GPIO/SPI (Raspberry Pi with RC522 modules)
 /// - Mock (Testing)
 library;
 

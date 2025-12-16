@@ -1,7 +1,7 @@
 /// RFID Reader Abstraction Layer
 /// 
-/// This interface decouples the business logic from the specific hardware implementation
-/// (Serial communication via Arduinos or direct GPIO/SPI on Raspberry Pi).
+/// This interface decouples the business logic from the specific hardware implementation.
+/// Currently supports GPIO/SPI communication on Raspberry Pi.
 /// 
 /// All RFID readers must implement this interface to ensure consistent behavior
 /// across different hardware platforms.
@@ -113,7 +113,6 @@ class RFIDReading {
 /// Abstract interface for RFID readers
 /// 
 /// Implementations:
-/// - SerialRFIDAdapter: Reads from Arduino via USB Serial
 /// - GPIOSPIRFIDAdapter: Reads from RC522 modules via GPIO/SPI on Raspberry Pi
 /// - MockRFIDAdapter: Mock implementation for testing
 abstract class RFIDReader {

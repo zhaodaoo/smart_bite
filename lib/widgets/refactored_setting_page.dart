@@ -107,8 +107,6 @@ class RefactoredSettingPage extends StatelessWidget {
     switch (platform) {
       case PlatformType.raspberryPi:
         return Icons.developer_board;
-      case PlatformType.desktop:
-        return Icons.usb;
       case PlatformType.mock:
         return Icons.science;
       case PlatformType.unknown:
