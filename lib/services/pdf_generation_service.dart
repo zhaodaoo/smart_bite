@@ -1032,6 +1032,124 @@ class PDFGenerationService {
         targetSize: const Size(3508, 2480),
         delay: const Duration(milliseconds: 500));
   }
+
+  /// Generates a test PDF with background images only.
+  ///
+  /// This method creates a minimal PDF with just the background images
+  /// for testing printer configuration. No actual data is included.
+  ///
+  /// Parameters:
+  /// - [format]: The page format for the PDF
+  /// - [includeLabelPage]: If true, includes both report and label backgrounds.
+  ///                       If false, includes only the report background.
+  ///
+  /// Throws [PDFGenerationException] if PDF generation fails.
+  static Future<Uint8List> generateTestPdf({
+    required PdfPageFormat format,
+    required bool includeLabelPage,
+  }) async {
+    try {
+      // Load Chinese font
+      final fontData =
+          await rootBundle.load('assets/fonts/NotoSansCJK-Regular.otf');
+      final ttf = pw.Font.ttf(fontData);
+
+      final pdf = pw.Document();
+
+      // Always add report background page
+      final reportImage = await _generateTestReportPage();
+      pdf.addPage(
+        pw.Page(
+          orientation: pw.PageOrientation.landscape,
+          pageFormat: format.copyWith(
+              marginBottom: 0.3 * PdfPageFormat.cm,
+              marginLeft: 0.3 * PdfPageFormat.cm,
+              marginRight: 0.3 * PdfPageFormat.cm,
+              marginTop: 0.3 * PdfPageFormat.cm),
+          theme: pw.ThemeData.withFont(base: ttf),
+          build: (context) {
+            return pw.Center(
+              child: pw.Image(
+                pw.MemoryImage(reportImage),
+                fit: pw.BoxFit.contain,
+              ),
+            );
+          },
+        ),
+      );
+
+      // Conditionally add label background page
+      if (includeLabelPage) {
+        final labelImage = await _generateTestLabelPage();
+        pdf.addPage(
+          pw.Page(
+            orientation: pw.PageOrientation.landscape,
+            pageFormat: format.copyWith(
+                marginBottom: 0.3 * PdfPageFormat.cm,
+                marginLeft: 0.3 * PdfPageFormat.cm,
+                marginRight: 0.3 * PdfPageFormat.cm,
+                marginTop: 0.3 * PdfPageFormat.cm),
+            theme: pw.ThemeData.withFont(base: ttf),
+            build: (context) {
+              return pw.Center(
+                child: pw.Image(
+                  pw.MemoryImage(labelImage),
+                  fit: pw.BoxFit.contain,
+                ),
+              );
+            },
+          ),
+        );
+      }
+
+      return pdf.save();
+    } catch (e) {
+      throw PDFGenerationException(
+          'Failed to generate test PDF: ${e.toString()}');
+    }
+  }
+
+  /// Internal method to generate a test report page with background only.
+  ///
+  /// Returns the captured image as [Uint8List].
+  static Future<Uint8List> _generateTestReportPage() async {
+    // Create a simple container with just the report background image
+    Widget myContainer = Container(
+      decoration: const BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage("assets/images/printing_layout_1.png"),
+          fit: BoxFit.contain,
+        ),
+      ),
+    );
+
+    final screenshotController = ScreenshotController();
+    return await screenshotController.captureFromWidget(myContainer,
+        pixelRatio: 1,
+        targetSize: const Size(3508, 2480),
+        delay: const Duration(milliseconds: 500));
+  }
+
+  /// Internal method to generate a test label page with background only.
+  ///
+  /// Returns the captured image as [Uint8List].
+  static Future<Uint8List> _generateTestLabelPage() async {
+    // Create a simple container with just the label background image
+    Widget myContainer = Container(
+      decoration: const BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage("assets/images/printing_layout_2.png"),
+          fit: BoxFit.contain,
+        ),
+      ),
+    );
+
+    final screenshotController = ScreenshotController();
+    return await screenshotController.captureFromWidget(myContainer,
+        pixelRatio: 1,
+        targetSize: const Size(3508, 2480),
+        delay: const Duration(milliseconds: 500));
+  }
 }
 /// Exception thrown when PDF generation fails.
 class PDFGenerationException implements Exception {

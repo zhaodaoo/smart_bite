@@ -6,8 +6,11 @@
 /// - Mock: Test scenario selection
 library;
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:pdf/pdf.dart';
 import 'package:provider/provider.dart';
 
 import '../provider/rfid_reader_provider.dart';
@@ -16,6 +19,8 @@ import '../interfaces/rfid_reader.dart';
 import '../utils/platform_detector.dart';
 import '../services/data_persistence_service.dart';
 import '../services/meal_identification_service.dart';
+import '../services/pdf_generation_service.dart';
+import '../services/printer_service.dart';
 
 class SettingPage extends StatelessWidget {
   const SettingPage({super.key});
@@ -263,10 +268,150 @@ class SettingPage extends StatelessWidget {
               },
             ),
           ),
-          // Add more printer settings as needed
+          const SizedBox(height: 24),
+          // Printing test button
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              onPressed: () => _handlePrintingTest(context),
+              icon: const Icon(Icons.print),
+              label: const Text('Printing Test'),
+              style: FilledButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          // Close app button
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.tonalIcon(
+              onPressed: () => _handleCloseApp(context),
+              icon: const Icon(Icons.close),
+              label: const Text('Close Application'),
+              style: FilledButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                backgroundColor: Colors.red[100],
+                foregroundColor: Colors.red[900],
+              ),
+            ),
+          ),
         ],
       ),
     );
+  }
+
+  /// Handles the printing test action
+  Future<void> _handlePrintingTest(BuildContext context) async {
+    final dataProvider = context.read<DataProvider>();
+    final printerName = dataProvider.printerName;
+
+    // Show loading dialog
+    if (context.mounted) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: Card(
+            child: Padding(
+              padding: EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 16),
+                  Text('Generating test PDF...'),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    try {
+      // Check printer availability
+      final printerAvailable = await PrinterService.isPrinterAvailable(printerName);
+      
+      if (!printerAvailable) {
+        if (context.mounted) {
+          Navigator.of(context).pop(); // Close loading dialog
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Printer "$printerName" not found'),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 4),
+            ),
+          );
+        }
+        return;
+      }
+
+      // Generate and print test PDF
+      final format = PdfPageFormat.a4.landscape;
+      final includeLabelPage = dataProvider.includeLabelPage;
+      await PrinterService.printPdf(
+        printerName: printerName,
+        format: format,
+        onLayout: (format) => PDFGenerationService.generateTestPdf(
+          format: format,
+          includeLabelPage: includeLabelPage,
+        ),
+        usePrinterSettings: true,
+      );
+
+      if (context.mounted) {
+        Navigator.of(context).pop(); // Close loading dialog
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Test print job sent successfully'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.of(context).pop(); // Close loading dialog
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Printing test failed: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+    }
+  }
+
+  /// Handles the close app action
+  Future<void> _handleCloseApp(BuildContext context) async {
+    // Show confirmation dialog
+    final shouldClose = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Close Application'),
+        content: const Text('Are you sure you want to close the application?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.red,
+            ),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldClose == true) {
+      // Exit the application
+      exit(0);
+    }
   }
 }
 
