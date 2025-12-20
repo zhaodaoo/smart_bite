@@ -36,9 +36,9 @@ class DataProvider extends ChangeNotifier {
       _includeLabelPage = await DataPersistenceService.loadIncludeLabelPage();
       _printerName = await DataPersistenceService.loadPrinterName();
 
-      // If no printer name is saved or it's the default 'SmartBite',
-      // try to use the system's default printer
-      if (_printerName.isEmpty || _printerName == 'SmartBite') {
+      // If no printer name is saved, try to use the system's default printer
+      // Note: We respect user's choice of 'SmartBite' if explicitly saved
+      if (_printerName.isEmpty) {
         try {
           final defaultPrinter = await PrinterService.getDefaultPrinter();
           if (defaultPrinter != null) {
@@ -48,11 +48,12 @@ class DataProvider extends ChangeNotifier {
             debugPrint('✓ Auto-selected system default printer: $_printerName');
           } else {
             debugPrint(
-                'ℹ No system default printer found, using saved: $_printerName');
+                'ℹ No system default printer found, using fallback: SmartBite');
+            _printerName = 'SmartBite'; // Fallback to SmartBite
           }
         } catch (e) {
           debugPrint('❌ Error auto-selecting default printer: $e');
-          // Keep the loaded printer name (fallback to 'SmartBite')
+          _printerName = 'SmartBite'; // Fallback to SmartBite on error
         }
       }
 
