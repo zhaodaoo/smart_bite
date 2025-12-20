@@ -25,6 +25,46 @@ class DataProvider extends ChangeNotifier {
   // Analysis results from service (cached after analyze() is called)
   NutritionAnalysisResult? _analysisResult;
 
+  /// Constructor that loads saved settings
+  DataProvider() {
+    _loadSavedSettings();
+  }
+
+  /// Loads saved settings from persistence service
+  Future<void> _loadSavedSettings() async {
+    try {
+      _includeLabelPage = await DataPersistenceService.loadIncludeLabelPage();
+      _printerName = await DataPersistenceService.loadPrinterName();
+
+      // If no printer name is saved or it's the default 'SmartBite',
+      // try to use the system's default printer
+      if (_printerName.isEmpty || _printerName == 'SmartBite') {
+        try {
+          final defaultPrinter = await PrinterService.getDefaultPrinter();
+          if (defaultPrinter != null) {
+            _printerName = defaultPrinter.url;
+            // Save the default printer for future use
+            await DataPersistenceService.savePrinterName(_printerName);
+            debugPrint('✓ Auto-selected system default printer: $_printerName');
+          } else {
+            debugPrint(
+                'ℹ No system default printer found, using saved: $_printerName');
+          }
+        } catch (e) {
+          debugPrint('❌ Error auto-selecting default printer: $e');
+          // Keep the loaded printer name (fallback to 'SmartBite')
+        }
+      }
+
+      debugPrint(
+          '✓ Settings loaded: includeLabelPage=$_includeLabelPage, printerName=$_printerName');
+      notifyListeners();
+    } catch (e) {
+      debugPrint('❌ Error loading saved settings: $e');
+      // Keep default values on error
+    }
+  }
+
   // Getters for UI state
   Meal get meal => _meal;
   ActivityLevel get activityLevel => _activityLevel;
@@ -198,31 +238,9 @@ class DataProvider extends ChangeNotifier {
     _age = Age.zeroToNine;
     orderNames = [];
     _analysisResult = null;
-    // Load saved preferences
-    _includeLabelPage = await DataPersistenceService.loadIncludeLabelPage();
-    _printerName = await DataPersistenceService.loadPrinterName();
 
-    // If no printer name is saved or it's the default 'SmartBite',
-    // try to use the system's default printer
-    if (_printerName.isEmpty || _printerName == 'SmartBite') {
-      try {
-        final defaultPrinter = await PrinterService.getDefaultPrinter();
-        if (defaultPrinter != null) {
-          _printerName = defaultPrinter.url;
-          // Save the default printer for future use
-          await DataPersistenceService.savePrinterName(_printerName);
-          debugPrint('✓ Auto-selected system default printer: $_printerName');
-        } else {
-          debugPrint(
-              'ℹ No system default printer found, using saved: $_printerName');
-        }
-      } catch (e) {
-        debugPrint('❌ Error auto-selecting default printer: $e');
-        // Keep the loaded printer name (fallback to 'SmartBite')
-      }
-    }
-
-    notifyListeners();
+    // Reload saved preferences (in case they changed while app was running)
+    await _loadSavedSettings();
   }
 
   /// Saves analysis data using DataPersistenceService.
