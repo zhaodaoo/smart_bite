@@ -13,6 +13,7 @@ import '../provider/rfid_reader_provider.dart';
 import '../provider/data_provider.dart';
 import '../interfaces/rfid_reader.dart';
 import '../utils/platform_detector.dart';
+import '../services/data_persistence_service.dart';
 
 class SettingPage extends StatelessWidget {
   const SettingPage({super.key});
@@ -230,6 +231,19 @@ class SettingPage extends StatelessWidget {
             onChanged: (value) {
               context.read<DataProvider>().printerName = value;
             },
+          ),
+          const SizedBox(height: 24),
+          Card(
+            child: SwitchListTile(
+              title: const Text('Include Food Label Page'),
+              subtitle: const Text('Print nutrition report with food label information'),
+              value: context.watch<DataProvider>().includeLabelPage,
+              onChanged: (value) async {
+                context.read<DataProvider>().includeLabelPage = value;
+                // Save preference immediately
+                await DataPersistenceService.saveIncludeLabelPage(value);
+              },
+            ),
           ),
           // Add more printer settings as needed
         ],

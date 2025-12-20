@@ -145,16 +145,17 @@ class _InputScreenState extends State<InputScreen> {
                         _currentPage = Page.analyzingPage;
                       });
                       await context.read<DataProvider>().analyze();
-                      // Start printing combined PDF (nutrition report + label info)
+                      // Start printing: combined PDF (report + label) or report only
+                      final dataProvider = context.read<DataProvider>();
                       Printing.directPrintPdf(
                           printer: Printer(
                               // ignore: use_build_context_synchronously
-                              url: context.read<DataProvider>().printerName),
+                              url: dataProvider.printerName),
                           format: PdfPageFormat.a4.landscape,
                           usePrinterSettings: true,
-                          onLayout: (format) => context
-                              .read<DataProvider>()
-                              .generateCombinedPdf(format));
+                          onLayout: (format) => dataProvider.includeLabelPage
+                              ? dataProvider.generateCombinedPdf(format)
+                              : dataProvider.generateReportPdf(format));
                       // ignore: use_build_context_synchronously
                       await context.read<DataProvider>().saveData();
                       await Future.delayed(const Duration(seconds: 4));

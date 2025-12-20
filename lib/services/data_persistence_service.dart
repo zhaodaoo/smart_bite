@@ -97,6 +97,46 @@ class DataPersistenceService {
       throw DataPersistenceException('Failed to delete data: ${e.toString()}');
     }
   }
+
+  /// Saves the includeLabelPage preference.
+  ///
+  /// Throws [DataPersistenceException] if save fails.
+  static Future<void> saveIncludeLabelPage(bool value) async {
+    try {
+      final file = await _getPreferencesFile();
+      await file.writeAsString(value ? '1' : '0');
+      debugPrint('✓ includeLabelPage preference saved: $value');
+    } catch (e) {
+      debugPrint('❌ Error saving includeLabelPage preference: $e');
+      throw DataPersistenceException('Failed to save includeLabelPage preference: ${e.toString()}');
+    }
+  }
+
+  /// Loads the includeLabelPage preference.
+  ///
+  /// Returns false (default) if file doesn't exist or contains invalid data.
+  static Future<bool> loadIncludeLabelPage() async {
+    try {
+      final file = await _getPreferencesFile();
+      if (await file.exists()) {
+        final content = await file.readAsString();
+        final value = content.trim() == '1';
+        debugPrint('✓ includeLabelPage preference loaded: $value');
+        return value;
+      }
+      debugPrint('ℹ includeLabelPage preference file not found, using default: false');
+      return false; // Default: only print report
+    } catch (e) {
+      debugPrint('❌ Error loading includeLabelPage preference: $e, using default: false');
+      return false; // Default on error
+    }
+  }
+
+  /// Gets the preferences file for storing settings.
+  static Future<File> _getPreferencesFile() async {
+    final path = await _getLocalPath();
+    return File('$path/preferences.txt');
+  }
 }
 
 /// Exception thrown when data persistence operations fail.

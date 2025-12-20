@@ -13,6 +13,7 @@ import 'package:smart_bite/services/data_persistence_service.dart';
 /// Business logic has been extracted to service classes.
 class DataProvider extends ChangeNotifier {
   String _printerName = 'DCPT426W';
+  bool _includeLabelPage = false; // Default: only print report, not label
   Meal _meal = Meal.lunch;
   ActivityLevel _activityLevel = ActivityLevel.miderate;
   Sex _sex = Sex.female;
@@ -72,6 +73,12 @@ class DataProvider extends ChangeNotifier {
   String get printerName => _printerName;
   set printerName(String input) {
     _printerName = input;
+    notifyListeners();
+  }
+
+  bool get includeLabelPage => _includeLabelPage;
+  set includeLabelPage(bool value) {
+    _includeLabelPage = value;
     notifyListeners();
   }
 
@@ -186,6 +193,8 @@ class DataProvider extends ChangeNotifier {
     _age = Age.zeroToNine;
     orderNames = [];
     _analysisResult = null;
+    // Load saved includeLabelPage preference (defaults to false if not saved)
+    _includeLabelPage = await DataPersistenceService.loadIncludeLabelPage();
     notifyListeners();
   }
 
