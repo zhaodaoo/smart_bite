@@ -14,8 +14,8 @@ import '../provider/data_provider.dart';
 import '../interfaces/rfid_reader.dart';
 import '../utils/platform_detector.dart';
 
-class RefactoredSettingPage extends StatelessWidget {
-  const RefactoredSettingPage({super.key});
+class SettingPage extends StatelessWidget {
+  const SettingPage({super.key});
 
   @override
   Widget build(BuildContext context) {

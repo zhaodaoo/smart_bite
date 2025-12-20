@@ -4,8 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:smart_bite/data/constant.dart';
 import 'package:smart_bite/provider/data_provider.dart';
 import 'package:smart_bite/provider/rfid_reader_provider.dart';
-import 'package:smart_bite/widgets/refactored_order_page.dart';
-import 'package:smart_bite/screens/setting_screen.dart';
+import 'package:smart_bite/widgets/setting_page.dart';
+import 'package:smart_bite/interfaces/rfid_reader.dart';
 
 import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
@@ -110,18 +110,6 @@ class _InputScreenState extends State<InputScreen> {
                     },
                     onSubmit: () {
                       setState(() {
-                        _currentPage = Page.orderPage;
-                      });
-                    },
-                  ),
-                Page.orderPage => RefactoredOrderPage(
-                    onGoBack: () {
-                      setState(() {
-                        _currentPage = Page.activityLevelPage;
-                      });
-                    },
-                    onSubmit: () {
-                      setState(() {
                         _currentPage = Page.confirmPage;
                       });
                     },
@@ -129,7 +117,19 @@ class _InputScreenState extends State<InputScreen> {
                 Page.confirmPage => ConfirmPage(
                     onGoBack: () {
                       setState(() {
+                        _currentPage = Page.activityLevelPage;
+                      });
+                    },
+                    onSubmit: () {
+                      setState(() {
                         _currentPage = Page.orderPage;
+                      });
+                    },
+                  ),
+                Page.orderPage => OrderPage(
+                    onGoBack: () {
+                      setState(() {
+                        _currentPage = Page.confirmPage;
                       });
                     },
                     onSubmit: () async {
@@ -207,9 +207,175 @@ class LoadingPage extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        MyHeadLine(hint),
+        _HeadLine(hint),
         const SizedBox(width: 880, child: LinearProgressIndicator()),
       ],
+    );
+  }
+}
+
+/// Order card widget for displaying detected meal
+class _OrderCard extends StatelessWidget {
+  final ReaderStatus status;
+  final String mealName;
+  final double width;
+
+  const _OrderCard({
+    required this.status,
+    required this.mealName,
+    this.width = 260,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: width,
+      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: status.color.withValues(alpha: 0.1),
+        border: Border.all(color: status.color, width: 2),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                _getStatusIcon(status),
+                color: status.color,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              // Text(
+              //   status.displayName,
+              //   style: TextStyle(
+              //     color: status.color,
+              //     fontWeight: FontWeight.bold,
+              //   ),
+              // ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            mealName,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  IconData _getStatusIcon(ReaderStatus status) {
+    switch (status) {
+      case ReaderStatus.ok:
+        return Icons.check_circle;
+      case ReaderStatus.error:
+        return Icons.error;
+      case ReaderStatus.updating:
+        return Icons.refresh;
+      case ReaderStatus.init:
+        return Icons.radio_button_unchecked;
+      case ReaderStatus.disconnected:
+        return Icons.cloud_off;
+    }
+  }
+}
+
+/// Refactored OrderPage using RFIDReaderProvider
+class OrderPage extends StatelessWidget {
+  final void Function() onGoBack;
+  final void Function() onSubmit;
+
+  const OrderPage({
+    super.key,
+    required this.onGoBack,
+    required this.onSubmit,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.max,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        const _HeadLine('6.這是您點的餐：'),
+        
+        // Meal display section
+        Padding(
+          padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
+          child: _buildMealDisplay(context),
+        ),
+
+        // Action buttons
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            _SubmitButton(
+              onPressed: onGoBack,
+              label: '返回',
+            ),
+            const SizedBox(width: 61),
+            _SubmitButton(
+              onPressed: () async {
+                await context.read<RFIDReaderProvider>().updateReaders();
+              },
+              label: '重新感應',
+            ),
+            const SizedBox(width: 61),
+            _SubmitButton(
+              onPressed: () {
+                // Transfer order data to DataProvider
+                final orderNames = context.read<RFIDReaderProvider>().orderNames;
+                context.read<DataProvider>().orderNames = orderNames;
+                onSubmit();
+              },
+              label: '分析',
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMealDisplay(BuildContext context) {
+    final isScanning = context.select<RFIDReaderProvider, bool>(
+      (provider) => provider.isScanning,
+    );
+
+    if (isScanning) {
+      return const CircularProgressIndicator.adaptive();
+    }
+
+    final orderNames = context.select<RFIDReaderProvider, List<String>>(
+      (provider) => provider.orderNames,
+    );
+
+    if (orderNames.isEmpty) {
+      return const _OrderCard(
+        width: 390,
+        status: ReaderStatus.init,
+        mealName: '沒收到您的點餐，是不知道要吃什麼嗎？可以請服務人員為您推薦！',
+      );
+    }
+
+    return Wrap(
+      spacing: 8,
+      direction: Axis.horizontal,
+      alignment: WrapAlignment.center,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: orderNames
+          .map((mealName) => _OrderCard(
+                status: ReaderStatus.ok,
+                mealName: mealName,
+              ))
+          .toList(),
     );
   }
 }
@@ -228,15 +394,15 @@ class ConfirmPage extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const MyHeadLine('資料確認'),
+        const _HeadLine('5.資料確認'),
         Wrap(
             // spacing: 8,
             direction: Axis.horizontal,
             alignment: WrapAlignment.spaceBetween,
             crossAxisAlignment: WrapCrossAlignment.center,
-            children: context.select<DataProvider, List<InfoCard>>((provider) {
+            children: context.select<DataProvider, List<_InfoCard>>((provider) {
               return [
-                InfoCard(
+                _InfoCard(
                     icon: switch (provider.meal) {
                       Meal.breakfast => Icons.breakfast_dining,
                       Meal.lunch => Icons.lunch_dining,
@@ -244,50 +410,34 @@ class ConfirmPage extends StatelessWidget {
                     },
                     title: getMealLabel(provider.meal),
                     subtitle: '這是哪一餐'),
-                InfoCard(
+                _InfoCard(
                     icon: switch (provider.sex) {
                       Sex.female => Icons.female,
                       Sex.male => Icons.male,
                     },
                     title: getSexLabel(provider.sex),
                     subtitle: '性別'),
-                InfoCard(
+                _InfoCard(
                     icon: Icons.numbers,
                     title: getAgeLabel(provider.age),
                     subtitle: '年齡'),
-                InfoCard(
+                _InfoCard(
                     icon: Icons.directions_run,
                     title: getActivityLevelLabel(provider.activityLevel),
                     subtitle: '生活活動強度'),
               ];
             })),
-        context.select<DataProvider, Widget>((provider) {
-          return provider.orderNames.isNotEmpty
-              ? Padding(
-                  padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
-                  child: Wrap(
-                      spacing: 8,
-                      direction: Axis.horizontal,
-                      alignment: WrapAlignment.center,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: List<OrderCard>.generate(
-                          provider.orderNames.length, (index) {
-                        return OrderCard(mealName: provider.orderNames[index]);
-                      })),
-                )
-              : const OrderCard(width: 400, mealName: '沒收到你的點餐，難道...吃空氣？');
-        }),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            MySubmitButton(
+            _SubmitButton(
               onPressed: onGoBack,
               label: '返回',
             ),
-            MySubmitButton(
+            _SubmitButton(
               onPressed: onSubmit,
-              label: '分析',
+              label: '確認',
             )
           ],
         )
@@ -319,7 +469,7 @@ class ActivityLevelPage extends StatelessWidget {
       return List<Widget>.generate(
         ActivityLevel.values.length,
         (int index) {
-          return MyTileChoiceChip(
+          return _TileChoiceChip(
             title: getActivityLevelLabel(ActivityLevel.values[index]),
             subtitle: switch (ActivityLevel.values[index]) {
               ActivityLevel.low => '靜態活動，多半坐著或躺著。',
@@ -343,7 +493,7 @@ class ActivityLevelPage extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const MyHeadLine('4.活動生活活動強度如何？'),
+        const _HeadLine('4.活動生活活動強度如何？'),
         Wrap(
             spacing: 8.0,
             alignment: WrapAlignment.center,
@@ -352,11 +502,11 @@ class ActivityLevelPage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            MySubmitButton(
+            _SubmitButton(
               onPressed: onGoBack,
               label: '返回',
             ),
-            MySubmitButton(
+            _SubmitButton(
               onPressed: onSubmit,
               label: '確認',
             )
@@ -382,7 +532,7 @@ class AgePage extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const MyHeadLine('3.請問您幾歲？'),
+        const _HeadLine('3.請問您幾歲？'),
         Padding(
           padding: const EdgeInsets.fromLTRB(240, 0, 240, 0),
           child: Wrap(
@@ -393,8 +543,9 @@ class AgePage extends StatelessWidget {
               (int index) {
                 return Padding(
                   padding: const EdgeInsets.fromLTRB(0, 4, 0, 4),
-                  child: MyChoiceChip(
+                  child: _ChoiceChip(
                     label: getAgeLabel(Age.values[index]),
+                    icon: Icons.numbers,
                     selected: context.select<DataProvider, Age>(
                             (provider) => provider.age) ==
                         Age.values[index],
@@ -413,11 +564,11 @@ class AgePage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            MySubmitButton(
+            _SubmitButton(
               onPressed: onGoBack,
               label: '返回',
             ),
-            MySubmitButton(
+            _SubmitButton(
               onPressed: () {
                 dataProvider.activityLevel = ActivityLevel.miderate;
                 onSubmit();
@@ -444,13 +595,13 @@ class SexPage extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const MyHeadLine('2.選擇您的性別：'),
+        const _HeadLine('2.選擇您的性別：'),
         Wrap(
           spacing: 16.0,
           children: List<Widget>.generate(
             Sex.values.length,
             (int index) {
-              return MyChoiceChip(
+              return _ChoiceChip(
                 label: getSexLabel(Sex.values[index]),
                 icon: switch (Sex.values[index]) {
                   Sex.female => Icons.female,
@@ -472,11 +623,11 @@ class SexPage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            MySubmitButton(
+            _SubmitButton(
               onPressed: onGoBack,
               label: '返回',
             ),
-            MySubmitButton(
+            _SubmitButton(
               onPressed: onSubmit,
               label: '確認',
             )
@@ -500,13 +651,13 @@ class MealPage extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const MyHeadLine('1.這是哪一餐？'),
+        const _HeadLine('1.這是哪一餐？'),
         Wrap(
           spacing: 16.0,
           children: List<Widget>.generate(
             Meal.values.length,
             (int index) {
-              return MyChoiceChip(
+              return _ChoiceChip(
                 label: getMealLabel(Meal.values[index]),
                 icon: switch (Meal.values[index]) {
                   Meal.breakfast => Icons.breakfast_dining,
@@ -529,11 +680,11 @@ class MealPage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            MySubmitButton(
+            _SubmitButton(
               onPressed: onGoBack,
               label: '返回',
             ),
-            MySubmitButton(
+            _SubmitButton(
               onPressed: onSubmit,
               label: '確認',
             )
@@ -571,7 +722,7 @@ class _HomePageState extends State<HomePage> {
             : const SizedBox(
                 height: 4,
               ),
-        MySubmitButton(
+        _SubmitButton(
           onPressed: () async {
             setState(() {
               isStart = true;
@@ -587,12 +738,12 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-class MySubmitButton extends StatelessWidget {
+class _SubmitButton extends StatelessWidget {
   final void Function() onPressed;
   final String label;
 
-  const MySubmitButton(
-      {super.key, required this.onPressed, required this.label});
+  const _SubmitButton(
+      {required this.onPressed, required this.label});
 
   @override
   Widget build(BuildContext context) {
@@ -617,18 +768,17 @@ class MySubmitButton extends StatelessWidget {
   }
 }
 
-class MyTileChoiceChip extends StatelessWidget {
+class _TileChoiceChip extends StatelessWidget {
   final String title;
   final String subtitle;
   final bool selected;
   final void Function(bool)? onSelected;
 
-  const MyTileChoiceChip(
-      {super.key,
-      required this.title,
+  const _TileChoiceChip(
+      {required this.title,
       required this.subtitle,
       required this.selected,
-      this.onSelected});
+      required this.onSelected});
 
   @override
   Widget build(BuildContext context) {
@@ -657,18 +807,17 @@ class MyTileChoiceChip extends StatelessWidget {
   }
 }
 
-class MyChoiceChip extends StatelessWidget {
-  final IconData? icon;
+class _ChoiceChip extends StatelessWidget {
+  final IconData icon;
   final String label;
   final bool selected;
   final void Function(bool)? onSelected;
 
-  const MyChoiceChip(
-      {super.key,
-      this.icon,
+  const _ChoiceChip(
+      {required this.icon,
       required this.label,
       required this.selected,
-      this.onSelected});
+      required this.onSelected});
 
   @override
   Widget build(BuildContext context) {
@@ -677,16 +826,7 @@ class MyChoiceChip extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
-          children: icon == null
-              ? [
-                  Text(label,
-                      style: TextStyle(
-                          fontSize: Theme.of(context)
-                              .textTheme
-                              .displaySmall!
-                              .fontSize)),
-                ]
-              : [
+          children: [
                   Icon(
                     icon,
                     size: Theme.of(context).textTheme.displayMedium!.fontSize,
@@ -707,10 +847,10 @@ class MyChoiceChip extends StatelessWidget {
   }
 }
 
-class MyHeadLine extends StatelessWidget {
+class _HeadLine extends StatelessWidget {
   final String text;
 
-  const MyHeadLine(this.text, {super.key});
+  const _HeadLine(this.text);
 
   @override
   Widget build(BuildContext context) {
@@ -722,59 +862,28 @@ class MyHeadLine extends StatelessWidget {
   }
 }
 
-class MyInfo extends StatelessWidget {
-  final String text;
+// class _Info extends StatelessWidget {
+//   final String text;
 
-  const MyInfo(this.text, {super.key});
+//   const _Info(this.text);
 
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: TextStyle(
-          fontSize: Theme.of(context).textTheme.displaySmall!.fontSize),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return Text(
+//       text,
+//       style: TextStyle(
+//           fontSize: Theme.of(context).textTheme.displaySmall!.fontSize),
+//     );
+//   }
+// }
 
-// Simple OrderCard for ConfirmPage (not RFID status related)
-class OrderCard extends StatelessWidget {
-  final String mealName;
-  final double? width;
-
-  const OrderCard({
-    super.key,
-    required this.mealName,
-    this.width,
-    Object? status, // Ignored, for compatibility
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: width ?? 280,
-      child: Card(
-        child: ListTile(
-          leading: const Icon(Icons.restaurant_menu, color: Colors.green),
-          title: Text(
-            mealName,
-            style: TextStyle(
-                fontSize: Theme.of(context).textTheme.bodyLarge!.fontSize),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class InfoCard extends StatelessWidget {
+class _InfoCard extends StatelessWidget {
   final String title;
   final String subtitle;
   final IconData icon;
 
-  const InfoCard(
-      {super.key,
-      required this.title,
+  const _InfoCard(
+      {required this.title,
       required this.subtitle,
       required this.icon});
   @override
