@@ -42,11 +42,13 @@ class SettingPage extends StatelessWidget {
           children: [
             // Left column: RFID Reader Settings
             Expanded(
+              flex: 3,
               child: _buildReaderSettingsColumn(context),
             ),
-
+            const SizedBox(width: 16),
             // Right column: Printer and Other Settings
             Expanded(
+              flex: 2,
               child: _buildPrinterSettingsColumn(context),
             ),
           ],
@@ -353,10 +355,10 @@ class SettingPage extends StatelessWidget {
           elevation: 2,
           child: SwitchListTile(
             title: Text(
-              '包含食物標籤頁面',
+              '包含三章一Q頁面',
               style: Theme.of(context).textTheme.bodyLarge,
             ),
-            subtitle: const Text('列印營養報告時包含食物標籤資訊'),
+            subtitle: const Text('列印營養報告時包含三章一Q資訊'),
             value: context.watch<DataProvider>().includeLabelPage,
             onChanged: (value) async {
               context.read<DataProvider>().includeLabelPage = value;

@@ -8,6 +8,7 @@ import 'package:smart_bite/widgets/setting_page.dart';
 import 'package:smart_bite/widgets/printer_not_found_dialog.dart';
 import 'package:smart_bite/interfaces/rfid_reader.dart';
 import 'package:smart_bite/services/printer_service.dart';
+import 'package:smart_bite/services/meal_identification_service.dart';
 
 import 'package:pdf/pdf.dart';
 
@@ -247,58 +248,82 @@ class LoadingPage extends StatelessWidget {
 class _OrderCard extends StatelessWidget {
   final ReaderStatus status;
   final String mealName;
+  final int? readerNumber; // Reader number (1-7), null for error messages
   final double width;
 
   const _OrderCard({
     required this.status,
     required this.mealName,
+    this.readerNumber,
     this.width = 320,
   });
 
   @override
   Widget build(BuildContext context) {
+    // Define color palette for readers
+    final readerColors = [
+      Colors.blue,
+      Colors.green,
+      Colors.orange,
+      Colors.purple,
+      Colors.red,
+      Colors.teal,
+      Colors.pink,
+    ];
+
+    // Use reader-specific color if available, otherwise use status color
+    final cardColor = readerNumber != null
+        ? readerColors[(readerNumber! - 1) % readerColors.length]
+        : status.color;
+
     return Container(
       width: width,
-      padding: const EdgeInsets.all(16),
-      margin: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: status.color.withValues(alpha: 0.1),
-        border: Border.all(color: status.color, width: 2),
+        color: cardColor.withValues(alpha: 0.1),
+        border: Border.all(color: cardColor, width: 2),
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            _getStatusIcon(status),
-            color: status.color,
-            size: 16,
-          ),
-          const SizedBox(width: 8),
-          Text(
-            mealName,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
+          // Reader badge and status
+          if (readerNumber != null)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: cardColor,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    '$readerNumber',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  mealName,
+                  style: TextStyle(
+                    fontSize: readerNumber != null ? 16 : 14,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black87,
+                  ),
+                ),
+              ],
             ),
-          ),
         ],
       ),
     );
-  }
-
-  IconData _getStatusIcon(ReaderStatus status) {
-    switch (status) {
-      case ReaderStatus.ok:
-        return Icons.check_circle;
-      case ReaderStatus.error:
-        return Icons.error;
-      case ReaderStatus.updating:
-        return Icons.refresh;
-      case ReaderStatus.init:
-        return Icons.radio_button_unchecked;
-      case ReaderStatus.disconnected:
-        return Icons.cloud_off;
-    }
   }
 }
 
@@ -351,12 +376,12 @@ class OrderPage extends StatelessWidget {
               onPressed: context.watch<RFIDReaderProvider>().isScanning
                   ? null
                   : () {
-                // Transfer order data to DataProvider
-                final orderNames =
-                    context.read<RFIDReaderProvider>().orderNames;
-                context.read<DataProvider>().orderNames = orderNames;
-                onSubmit();
-              },
+                      // Transfer order data to DataProvider
+                      final orderNames =
+                          context.read<RFIDReaderProvider>().orderNames;
+                      context.read<DataProvider>().orderNames = orderNames;
+                      onSubmit();
+                    },
               label: '分析',
             ),
           ],
@@ -374,29 +399,63 @@ class OrderPage extends StatelessWidget {
       return const CircularProgressIndicator.adaptive();
     }
 
-    final orderNames = context.select<RFIDReaderProvider, List<String>>(
-      (provider) => provider.orderNames,
+    // Get all readers and their readings
+    final readers = context.select<RFIDReaderProvider, List<RFIDReader>>(
+      (provider) => provider.readers,
     );
 
-    if (orderNames.isEmpty) {
+    if (readers.isEmpty) {
       return const _OrderCard(
         width: 390,
         status: ReaderStatus.init,
         mealName: '沒收到您的點餐，是不知道要吃什麼嗎？可以請服務人員為您推薦！',
+        readerNumber: null,
+      );
+    }
+
+    // Build cards only for readers with detected cards
+    final cardsWithMeals = <Widget>[];
+
+    for (var entry in readers.asMap().entries) {
+      final index = entry.key;
+      final reader = entry.value;
+      final readerNum = index + 1;
+
+      // Get the reading for this reader
+      final reading =
+          context.read<RFIDReaderProvider>().getReading(reader.deviceId);
+
+      // Only show readers that have cards
+      if (reading?.hasCard == true) {
+        // Get meal identification service
+        final mealService = MealIdentificationService();
+        final mealName = mealService.identifyMeal(reading!.rfid);
+
+        cardsWithMeals.add(_OrderCard(
+          status: ReaderStatus.ok,
+          mealName: mealName,
+          readerNumber: readerNum,
+        ));
+      }
+    }
+
+    // If no cards detected, show message
+    if (cardsWithMeals.isEmpty) {
+      return const _OrderCard(
+        width: 390,
+        status: ReaderStatus.init,
+        mealName: '沒收到您的點餐，是不知道要吃什麼嗎？可以請服務人員為您推薦！',
+        readerNumber: null,
       );
     }
 
     return Wrap(
       spacing: 8,
+      runSpacing: 8,
       direction: Axis.horizontal,
       alignment: WrapAlignment.center,
       crossAxisAlignment: WrapCrossAlignment.center,
-      children: orderNames
-          .map((mealName) => _OrderCard(
-                status: ReaderStatus.ok,
-                mealName: mealName,
-              ))
-          .toList(),
+      children: cardsWithMeals,
     );
   }
 }
@@ -762,36 +821,39 @@ class _HomePageState extends State<HomePage> {
                 height: 4,
               ),
         _SubmitButton(
-          onPressed: (isStart || isScanning) ? null : () async {
-            setState(() {
-              isStart = true;
-            });
+          onPressed: (isStart || isScanning)
+              ? null
+              : () async {
+                  setState(() {
+                    isStart = true;
+                  });
 
-            // Check printer availability FIRST
-            final dataProvider = context.read<DataProvider>();
-            final printerName = dataProvider.printerName;
+                  // Check printer availability FIRST
+                  final dataProvider = context.read<DataProvider>();
+                  final printerName = dataProvider.printerName;
 
-            debugPrint('🔍 Checking printer "$printerName" on startup...');
-            final isPrinterAvailable =
-                await PrinterService.isPrinterAvailable(printerName);
+                  debugPrint(
+                      '🔍 Checking printer "$printerName" on startup...');
+                  final isPrinterAvailable =
+                      await PrinterService.isPrinterAvailable(printerName);
 
-            if (!isPrinterAvailable) {
-              // Show printer not found dialog
-              // ignore: use_build_context_synchronously
-              await showPrinterNotFoundDialog(context, printerName);
-              // User canceled or went to settings, stay on home page
-              setState(() {
-                isStart = false;
-              });
-              return;
-            }
+                  if (!isPrinterAvailable) {
+                    // Show printer not found dialog
+                    // ignore: use_build_context_synchronously
+                    await showPrinterNotFoundDialog(context, printerName);
+                    // User canceled or went to settings, stay on home page
+                    setState(() {
+                      isStart = false;
+                    });
+                    return;
+                  }
 
-            // Printer found, proceed with RFID reader initialization
-            // ignore: use_build_context_synchronously
-            context.read<RFIDReaderProvider>().updateReaders();
-            await Future.delayed(const Duration(seconds: 3));
-            widget.onSubmit();
-          },
+                  // Printer found, proceed with RFID reader initialization
+                  // ignore: use_build_context_synchronously
+                  context.read<RFIDReaderProvider>().updateReaders();
+                  await Future.delayed(const Duration(seconds: 3));
+                  widget.onSubmit();
+                },
           label: '開始',
         )
       ],
