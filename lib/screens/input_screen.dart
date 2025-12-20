@@ -577,7 +577,7 @@ class _HomePageState extends State<HomePage> {
               isStart = true;
             });
             context.read<RFIDReaderProvider>().updateReaders();
-            await Future.delayed(const Duration(seconds: 1));
+            await Future.delayed(const Duration(seconds: 3));
             widget.onSubmit();
           },
           label: '確認',

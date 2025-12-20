@@ -31,7 +31,7 @@ class SimpleMFRC522 {
     _reader = MFRC522.withoutGpioInit(spiDevice: spiNum, resetPin: rstPin, rstGpio: _rstGpio);
     await _reader!.init();
     _tagId = null;
-    await Future.delayed(const Duration(seconds: 1));  // 等待讀卡器初始化完成
+    await Future.delayed(const Duration(milliseconds: 500));  // 等待讀卡器初始化完成
   }
 
   /// Reset the reader
@@ -43,7 +43,7 @@ class SimpleMFRC522 {
     }
     
     _rstGpio.write(false);  // GPIO.LOW - 關閉讀卡器
-    await Future.delayed(const Duration(seconds: 1));
+    await Future.delayed(const Duration(milliseconds: 500));
   }
 
   /// Read tag ID in non-blocking mode

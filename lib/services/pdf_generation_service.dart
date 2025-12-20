@@ -807,7 +807,7 @@ class PDFGenerationService {
     return await screenshotController.captureFromWidget(myContainer,
         pixelRatio: 1,
         targetSize: const Size(3508, 2480),
-        delay: const Duration(seconds: 3));
+        delay: const Duration(milliseconds: 500));
   }
 
   /// Generates a food label PDF (single page).
@@ -1015,7 +1015,7 @@ class PDFGenerationService {
     return await screenshotController.captureFromWidget(myContainer,
         pixelRatio: 1,
         targetSize: const Size(3508, 2480),
-        delay: const Duration(seconds: 3));
+        delay: const Duration(seconds: 4));
   }
 }
 

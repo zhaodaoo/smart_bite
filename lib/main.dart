@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:screenshot/screenshot.dart';
 import 'package:smart_bite/data/optimized_indexes.dart';
 import 'package:smart_bite/provider/data_provider.dart';
 import 'package:smart_bite/provider/rfid_reader_provider.dart';
@@ -16,6 +18,9 @@ Future<void> main() async {
   // Initialize optimized indexes for dishes and nutrition data
   // This improves RFID scanning and nutrition analysis performance by 40-50%
   await initializeOptimizedIndexes();
+
+  // Pre-load PDF background images to fix first print job missing background bug
+  await _preloadPDFAssets();
 
   // Must add this line.
   await windowManager.ensureInitialized();
@@ -35,6 +40,66 @@ Future<void> main() async {
     await windowManager.setSkipTaskbar(false);
   });
   runApp(const MyApp());
+}
+
+/// Preloads PDF background images at app startup to prevent missing background
+/// on first print job.
+///
+/// This function uses warm-up captureFromWidget() calls to force the screenshot
+/// rendering pipeline to load and cache the background images. The issue occurs
+/// because captureFromWidget() creates an isolated rendering context with its own
+/// image cache, separate from the main UI's ImageCache.
+Future<void> _preloadPDFAssets() async {
+  try {
+    debugPrint('🔄 Starting PDF assets preloading...');
+    
+    // Import is available at the top
+    final ScreenshotController controller = ScreenshotController();
+    
+    // Create dummy widgets with both background images to warm up the cache
+    final warmupWidget1 = Container(
+      width: 100,
+      height: 100,
+      decoration: const BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage("assets/images/printing_layout_1.png"),
+          fit: BoxFit.contain,
+        ),
+      ),
+    );
+    
+    final warmupWidget2 = Container(
+      width: 100,
+      height: 100,
+      decoration: const BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage("assets/images/printing_layout_2.png"),
+          fit: BoxFit.contain,
+        ),
+      ),
+    );
+    
+    // Execute warm-up captures to load images into screenshot pipeline's cache
+    // Use low resolution and longer delay to ensure images are fully loaded
+    await controller.captureFromWidget(
+      warmupWidget1,
+      pixelRatio: 0.1,
+      targetSize: const Size(100, 100),
+      delay: const Duration(seconds: 3),
+    );
+    
+    await controller.captureFromWidget(
+      warmupWidget2,
+      pixelRatio: 0.1,
+      targetSize: const Size(100, 100),
+      delay: const Duration(seconds: 3),
+    );
+    
+    debugPrint('✓ PDF background images preloaded successfully');
+  } catch (e) {
+    // Non-fatal: Log warning but don't block app startup
+    debugPrint('⚠ Failed to preload PDF assets: $e');
+  }
 }
 
 class MyApp extends StatelessWidget {
