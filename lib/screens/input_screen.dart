@@ -252,7 +252,7 @@ class _OrderCard extends StatelessWidget {
   const _OrderCard({
     required this.status,
     required this.mealName,
-    this.width = 260,
+    this.width = 320,
   });
 
   @override
@@ -266,31 +266,18 @@ class _OrderCard extends StatelessWidget {
         border: Border.all(color: status.color, width: 2),
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Row(
-            children: [
-              Icon(
-                _getStatusIcon(status),
-                color: status.color,
-                size: 20,
-              ),
-              const SizedBox(width: 8),
-              // Text(
-              //   status.displayName,
-              //   style: TextStyle(
-              //     color: status.color,
-              //     fontWeight: FontWeight.bold,
-              //   ),
-              // ),
-            ],
+          Icon(
+            _getStatusIcon(status),
+            color: status.color,
+            size: 16,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(width: 8),
           Text(
             mealName,
             style: const TextStyle(
-              fontSize: 18,
+              fontSize: 16,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -337,7 +324,7 @@ class OrderPage extends StatelessWidget {
 
         // Meal display section
         Padding(
-          padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
+          padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
           child: _buildMealDisplay(context),
         ),
 
@@ -430,7 +417,7 @@ class ConfirmPage extends StatelessWidget {
       children: [
         const _HeadLine('5.資料確認'),
         Padding(
-          padding: const EdgeInsets.fromLTRB(180, 0, 180, 0),
+          padding: const EdgeInsets.fromLTRB(60, 0, 60, 0),
           child: Wrap(
               direction: Axis.horizontal,
               alignment: WrapAlignment.spaceBetween,
@@ -541,7 +528,7 @@ class ActivityLevelPage extends StatelessWidget {
       children: [
         const _HeadLine('4.活動生活活動強度如何？'),
         Padding(
-          padding: const EdgeInsets.fromLTRB(180, 0, 180, 0),
+          padding: const EdgeInsets.fromLTRB(60, 0, 60, 0),
           child: Wrap(
               spacing: 8.0,
               alignment: WrapAlignment.center,
@@ -583,7 +570,7 @@ class AgePage extends StatelessWidget {
       children: [
         const _HeadLine('3.請問您幾歲？'),
         Padding(
-          padding: const EdgeInsets.fromLTRB(180, 0, 180, 0),
+          padding: const EdgeInsets.fromLTRB(60, 0, 60, 0),
           child: Wrap(
             spacing: 8.0,
             alignment: WrapAlignment.center,

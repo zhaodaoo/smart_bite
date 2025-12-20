@@ -19,6 +19,7 @@ class RFIDReaderProvider extends ChangeNotifier {
   
   List<String> _orderNames = [];
   bool _isScanning = false;
+  DateTime? _lastUpdateTime;
 
   RFIDReaderProvider({
     required RFIDReaderManager readerManager,
@@ -39,6 +40,9 @@ class RFIDReaderProvider extends ChangeNotifier {
 
   /// Whether a scan is currently in progress
   bool get isScanning => _isScanning;
+
+  /// Last update timestamp
+  DateTime? get lastUpdateTime => _lastUpdateTime;
 
   /// Number of readers
   int get readerCount => readers.length;
@@ -102,6 +106,9 @@ class RFIDReaderProvider extends ChangeNotifier {
         debugPrint('✓ Scan complete: ${_orderNames.length} meals identified');
         debugPrint('  Meals: $_orderNames');
       }
+      
+      // Update last scan timestamp
+      _lastUpdateTime = DateTime.now();
       
     } catch (e) {
       debugPrint('Error during scan: $e');

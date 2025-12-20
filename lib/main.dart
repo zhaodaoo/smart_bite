@@ -26,8 +26,8 @@ Future<void> main() async {
   await windowManager.ensureInitialized();
 
   if (Platform.isWindows) {
-    WindowManager.instance.setMinimumSize(const Size(1920, 1080));
-    WindowManager.instance.setMaximumSize(const Size(1920, 1080));
+    WindowManager.instance.setMinimumSize(const Size(1280, 720));
+    WindowManager.instance.setMaximumSize(const Size(3840, 2160));
   }
 
   // Use it only after calling `hiddenWindowAtLaunch`
