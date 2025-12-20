@@ -3,14 +3,13 @@ import 'package:smart_bite/data/comments.dart';
 import 'package:smart_bite/data/constant.dart';
 import 'package:smart_bite/data/dailyneeds_for_sixteen_above.dart';
 import 'package:smart_bite/data/dailyneeds_for_under_fifteen.dart';
-import 'package:smart_bite/data/dishes_info.dart';
-import 'package:smart_bite/data/dishes_label.dart';
+import 'package:smart_bite/data/optimized_indexes.dart';
 
 /// Service responsible for analyzing nutritional data and generating health comments.
 /// Separated from UI/state management for better testability and maintainability.
 class NutritionAnalysisService {
   /// Analyzes nutrition data and returns analysis results.
-  /// 
+  ///
   /// Throws [NutritionAnalysisException] if analysis fails due to missing data.
   static Future<NutritionAnalysisResult> analyzeNutrition({
     required List<String> orderNames,
@@ -54,7 +53,8 @@ class NutritionAnalysisService {
       }
 
       debugPrint('neededCaloriePerDay = ${calculation.neededCaloriePerDay}');
-      debugPrint('neededCalorieThisMeal = ${calculation.neededCalorieThisMeal}');
+      debugPrint(
+          'neededCalorieThisMeal = ${calculation.neededCalorieThisMeal}');
       debugPrint(
           'intakeFoodTypeDailyProportion = ${calculation.intakeFoodTypeDailyProportion}');
       debugPrint('intakeFoodType = ${calculation.intakeFoodType}');
@@ -62,12 +62,12 @@ class NutritionAnalysisService {
           'intakeTotalNutritionWithoutFoodType = ${calculation.intakeTotalNutritionWithoutFoodType}');
 
       // Generate comments
-      final overallComment = _getOverallComment(
-          calculation.intakeFoodTypeDailyProportion);
-      final commentsByFoodType = _getCommentByFoodType(
-          calculation.intakeFoodTypeDailyProportion);
-      final ranksByFoodType = _getRanksLabelByFoodType(
-          calculation.intakeFoodTypeDailyProportion);
+      final overallComment =
+          _getOverallComment(calculation.intakeFoodTypeDailyProportion);
+      final commentsByFoodType =
+          _getCommentByFoodType(calculation.intakeFoodTypeDailyProportion);
+      final ranksByFoodType =
+          _getRanksLabelByFoodType(calculation.intakeFoodTypeDailyProportion);
 
       debugPrint('overallComment = $overallComment');
       debugPrint('commentsByFoodType = $commentsByFoodType');
@@ -75,7 +75,8 @@ class NutritionAnalysisService {
       return NutritionAnalysisResult(
         neededCaloriePerDay: calculation.neededCaloriePerDay,
         neededCalorieThisMeal: calculation.neededCalorieThisMeal,
-        intakeFoodTypeDailyProportion: calculation.intakeFoodTypeDailyProportion,
+        intakeFoodTypeDailyProportion:
+            calculation.intakeFoodTypeDailyProportion,
         intakeFoodType: calculation.intakeFoodType,
         intakeTotalNutritionWithoutFoodType:
             calculation.intakeTotalNutritionWithoutFoodType,
@@ -92,6 +93,7 @@ class NutritionAnalysisService {
   }
 
   /// Extracts label information from ordered meals.
+  /// Optimized to use indexed lookup structures for faster access.
   static LabelInformation _extractLabelInformation(List<String> orderNames) {
     String productResumeLabelDishes = '';
     String productResumeLabelFood = '甘藷（地瓜）';
@@ -107,7 +109,8 @@ class NutritionAnalysisService {
     bool traceableLabelDishesIsDefault = true;
 
     for (var name in orderNames) {
-      Map<Label, String>? dishLabelInfo = dishesLabel[name];
+      // Use optimized index for faster lookup
+      Map<Label, String>? dishLabelInfo = OptimizedDishesLabel.get(name);
       if (dishLabelInfo == null) continue;
 
       if (productResumeLabelDishesIsDefault &&
@@ -157,17 +160,19 @@ class NutritionAnalysisService {
   }
 
   /// Calculates total nutrition from ordered meals.
+  /// Optimized to use pre-indexed DishNutrition objects for faster access.
   static Map<NutritionType, double> _calculateTotalNutrition(
       List<String> orderNames) {
-    List<Map<NutritionType, double>?> eachMealNutrition =
-        orderNames.map((name) => dishesInfo[name]).toList();
+    // Use optimized index for O(1) lookup instead of sequential map access
+    List<DishNutrition?> eachMealNutrition =
+        orderNames.map((name) => OptimizedDishesInfo.get(name)).toList();
 
     Map<NutritionType, double> intakeTotalNutrition = {};
     intakeTotalNutrition.addEntries(NutritionType.values.map((key) => MapEntry(
         key,
         eachMealNutrition
             .where((meal) => meal != null)
-            .map((meal) => meal![key] ?? 0.0)
+            .map((meal) => meal!.getValue(key))
             .fold(0.0, (previousValue, element) => previousValue + element))));
 
     return intakeTotalNutrition;
@@ -193,7 +198,8 @@ class NutritionAnalysisService {
     Map<NutritionType, double> todayNeeds = activityData;
     debugPrint('todayNeeds = $todayNeeds');
 
-    final neededCaloriePerDay = (todayNeeds[NutritionType.calorie] ?? 0).round();
+    final neededCaloriePerDay =
+        (todayNeeds[NutritionType.calorie] ?? 0).round();
     final neededCalorieThisMeal =
         (neededCaloriePerDay * (mealProportion[meal] ?? 0)).round();
 

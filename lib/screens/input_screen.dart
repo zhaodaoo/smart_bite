@@ -137,8 +137,6 @@ class _InputScreenState extends State<InputScreen> {
                         _currentPage = Page.analyzingPage;
                       });
                       await context.read<DataProvider>().analyze();
-                      // ignore: use_build_context_synchronously
-                      await context.read<DataProvider>().saveData();
                       // Start printing combined PDF (nutrition report + label info)
                       Printing.directPrintPdf(
                           printer: Printer(
@@ -149,12 +147,14 @@ class _InputScreenState extends State<InputScreen> {
                           onLayout: (format) => context
                               .read<DataProvider>()
                               .generateCombinedPdf(format));
-                      await Future.delayed(const Duration(seconds: 3));
+                      // ignore: use_build_context_synchronously
+                      await context.read<DataProvider>().saveData();
+                      await Future.delayed(const Duration(seconds: 4));
 
                       setState(() {
                         _currentPage = Page.printingPage;
                       });
-                      await Future.delayed(const Duration(seconds: 12));
+                      await Future.delayed(const Duration(seconds: 10));
 
                       setState(() {
                         // 進入初始化頁面
@@ -162,7 +162,7 @@ class _InputScreenState extends State<InputScreen> {
                       });
                       // ignore: use_build_context_synchronously
                       await context.read<DataProvider>().initialize();
-                      await Future.delayed(const Duration(seconds: 3));
+                      await Future.delayed(const Duration(seconds: 4));
                       setState(() {
                         _currentPage = Page.homePage;
                       });

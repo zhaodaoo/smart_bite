@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
 
 import 'package:smart_bite/data/constant.dart';
+import 'package:smart_bite/data/comments.dart';
 import 'package:smart_bite/services/nutrition_analysis_service.dart';
 import 'package:smart_bite/services/pdf_generation_service.dart';
 import 'package:smart_bite/services/data_persistence_service.dart';
@@ -63,6 +64,10 @@ class DataProvider extends ChangeNotifier {
         NutritionType.oils: '',
         NutritionType.dairy: '',
       };
+
+  // Provide access to comment templates (for UI separation of concerns)
+  Map<NutritionType, Map<Rank, String>> get commentTemplates =>
+      commentsForFoodTypeByRank;
 
   String get printerName => _printerName;
   set printerName(String input) {

@@ -4,7 +4,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:screenshot/screenshot.dart';
 import 'package:smart_bite/data/constant.dart';
-import 'package:smart_bite/data/three_label_one_code.dart';
+import 'package:smart_bite/data/lazy_label_data.dart';
 import 'package:smart_bite/services/nutrition_analysis_service.dart';
 import 'package:smart_bite/widgets/printing_text_widgets.dart';
 
@@ -891,8 +891,13 @@ class PDFGenerationService {
                       height: 825,
                       child: Align(
                           alignment: Alignment.topLeft,
-                          child: NormalBlackPrintingText(
-                              '料理： ${labelInfo.productResumeLabelDishes}\n追溯編號：${foodToLabelInfo[labelInfo.productResumeLabelFood]?["trace_code"]}\n產品名稱：${labelInfo.productResumeLabelFood}\n農產品經營者：${foodToLabelInfo[labelInfo.productResumeLabelFood]?["operator"]}\n包裝日期：${foodToLabelInfo[labelInfo.productResumeLabelFood]?["packaging_date"]}\n電話：${foodToLabelInfo[labelInfo.productResumeLabelFood]?["phone"]}\n地址：${foodToLabelInfo[labelInfo.productResumeLabelFood]?["address"]}'))),
+                          child: Builder(builder: (context) {
+                            // Cache lookup result to eliminate redundant map accesses
+                            final productResumeData = LazyLabelData.getInfo(
+                                labelInfo.productResumeLabelFood);
+                            return NormalBlackPrintingText(
+                                '料理： ${labelInfo.productResumeLabelDishes}\n追溯編號：${productResumeData?["trace_code"] ?? ""}\n產品名稱：${labelInfo.productResumeLabelFood}\n農產品經營者：${productResumeData?["operator"] ?? ""}\n包裝日期：${productResumeData?["packaging_date"] ?? ""}\n電話：${productResumeData?["phone"] ?? ""}\n地址：${productResumeData?["address"] ?? ""}');
+                          }))),
                   SizedBox(
                       height: 5,
                       width: 740,
@@ -914,8 +919,13 @@ class PDFGenerationService {
                       height: 825,
                       child: Align(
                           alignment: Alignment.topLeft,
-                          child: NormalBlackPrintingText(
-                              '料理：${labelInfo.casLabelDishes}\n標章編號：${foodToLabelInfo[labelInfo.casLabelFood]?["certification_id"]}\n產品種類：${foodToLabelInfo[labelInfo.casLabelFood]?["product_type"]}\n產品名稱：${labelInfo.casLabelFood}\n產品類別：${foodToLabelInfo[labelInfo.casLabelFood]?["category"]}\n廠商名稱：${foodToLabelInfo[labelInfo.casLabelFood]?["manufacturer"]}\n地址：${foodToLabelInfo[labelInfo.casLabelFood]?["address"]}\n電話：${foodToLabelInfo[labelInfo.casLabelFood]?["phone"]}\n負責人：${foodToLabelInfo[labelInfo.casLabelFood]?["representative"]}\n驗證機構：${foodToLabelInfo[labelInfo.casLabelFood]?["certification_body"]}'))),
+                          child: Builder(builder: (context) {
+                            // Cache lookup result to eliminate redundant map accesses
+                            final casData =
+                                LazyLabelData.getInfo(labelInfo.casLabelFood);
+                            return NormalBlackPrintingText(
+                                '料理：${labelInfo.casLabelDishes}\n標章編號：${casData?["certification_id"] ?? ""}\n產品種類：${casData?["product_type"] ?? ""}\n產品名稱：${labelInfo.casLabelFood}\n產品類別：${casData?["category"] ?? ""}\n廠商名稱：${casData?["manufacturer"] ?? ""}\n地址：${casData?["address"] ?? ""}\n電話：${casData?["phone"] ?? ""}\n負責人：${casData?["representative"] ?? ""}\n驗證機構：${casData?["certification_body"] ?? ""}');
+                          }))),
                   // space between label group 2
                   SizedBox(
                       height: 5,
@@ -950,9 +960,13 @@ class PDFGenerationService {
                 children: [
                   SizedBox(
                       height: 800,
-                      child: Center(
-                          child: NormalBlackPrintingText(
-                              '料理：${labelInfo.organicLabelDishes}\n品項：${foodToLabelInfo[labelInfo.organicLabelFood]?["category"]} \n產品範圍：${labelInfo.organicLabelFood}\n農產品經營者：${foodToLabelInfo[labelInfo.organicLabelFood]?["operator"]}\n驗證機構名稱：${foodToLabelInfo[labelInfo.organicLabelFood]?["certification_body"]}\n證書字號(有機)：${foodToLabelInfo[labelInfo.organicLabelFood]?["certificate_number"]}\n驗證效期：${foodToLabelInfo[labelInfo.organicLabelFood]?["expiration_date"]}\n電話：${foodToLabelInfo[labelInfo.organicLabelFood]?["phone"]}\n驗證場所地址(有機)：${foodToLabelInfo[labelInfo.organicLabelFood]?["address"]}'))),
+                      child: Center(child: Builder(builder: (context) {
+                        // Cache lookup result to eliminate redundant map accesses
+                        final organicData =
+                            LazyLabelData.getInfo(labelInfo.organicLabelFood);
+                        return NormalBlackPrintingText(
+                            '料理：${labelInfo.organicLabelDishes}\n品項：${organicData?["category"] ?? ""} \n產品範圍：${labelInfo.organicLabelFood}\n農產品經營者：${organicData?["operator"] ?? ""}\n驗證機構名稱：${organicData?["certification_body"] ?? ""}\n證書字號(有機)：${organicData?["certificate_number"] ?? ""}\n驗證效期：${organicData?["expiration_date"] ?? ""}\n電話：${organicData?["phone"] ?? ""}\n驗證場所地址(有機)：${organicData?["address"] ?? ""}');
+                      }))),
                   SizedBox(
                       height: 30,
                       width: 1100,
@@ -972,9 +986,13 @@ class PDFGenerationService {
                 children: [
                   SizedBox(
                       height: 800,
-                      child: Center(
-                          child: NormalBlackPrintingText(
-                              '料理：${labelInfo.traceableLabelDishes}\n追溯編號：${foodToLabelInfo[labelInfo.traceableLabelFood]?["trace_code"]}\n品名：${labelInfo.traceableLabelFood}\n生產者：${foodToLabelInfo[labelInfo.traceableLabelFood]?["operator"]}\n電話：${foodToLabelInfo[labelInfo.traceableLabelFood]?["phone"]}\n地址：${foodToLabelInfo[labelInfo.traceableLabelFood]?["address"]}\n簡介：${foodToLabelInfo[labelInfo.traceableLabelFood]?["description"]}'))),
+                      child: Center(child: Builder(builder: (context) {
+                        // Cache lookup result to eliminate redundant map accesses
+                        final traceableData =
+                            LazyLabelData.getInfo(labelInfo.traceableLabelFood);
+                        return NormalBlackPrintingText(
+                            '料理：${labelInfo.traceableLabelDishes}\n追溯編號：${traceableData?["trace_code"] ?? ""}\n品名：${labelInfo.traceableLabelFood}\n生產者：${traceableData?["operator"] ?? ""}\n電話：${traceableData?["phone"] ?? ""}\n地址：${traceableData?["address"] ?? ""}\n簡介：${traceableData?["description"] ?? ""}');
+                      }))),
                   SizedBox(
                       height: 30,
                       width: 1200,
