@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 import 'package:dart_periphery/dart_periphery.dart';
 import 'mfrc522.dart';
 import 'mfrc522_constants.dart';
@@ -46,12 +49,20 @@ class SimpleMFRC522 {
     await Future.delayed(const Duration(milliseconds: 500));
   }
 
-  /// Read tag ID in non-blocking mode
+  /// Read tag ID in non-blocking mode with timeout protection
   Future<String?> readIdNoBlock() async {
     try {
-      await initReader();
+      // Add timeout to prevent indefinite hangs on hardware failure
+      await initReader().timeout(
+        const Duration(seconds: 5),
+        onTimeout: () async {
+          debugPrint('RFID init timeout, resetting reader');
+          await resetReader();
+          throw TimeoutException('RFID reader initialization timeout');
+        },
+      );
 
-      // Request card
+      // Request card with timeout
       final requestResult = _reader!.request(PICCCommands.reqidl);
       if (requestResult.status != MFRC522Status.ok) {
         await resetReader();
@@ -68,6 +79,10 @@ class SimpleMFRC522 {
       await resetReader();
       _tagId = _uidToHex(anticollResult.uid);
       return _tagId;
+    } on TimeoutException catch (e) {
+      debugPrint('RFID operation timeout: $e');
+      await resetReader();
+      return null;
     } catch (e) {
       await resetReader();
       return null;

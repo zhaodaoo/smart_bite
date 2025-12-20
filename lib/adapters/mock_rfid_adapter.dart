@@ -67,7 +67,10 @@ class MockRFIDAdapter implements RFIDReader {
   @override
   Future<void> disconnect() async {
     _status = ReaderStatus.disconnected;
-    await _readingsController.close();
+    // Protect against double-dispose
+    if (!_readingsController.isClosed) {
+      await _readingsController.close();
+    }
     debugPrint('[$_address] Mock reader disconnected');
   }
 
@@ -241,8 +244,12 @@ class MockRFIDReaderManager extends ChangeNotifier implements RFIDReaderManager 
     notifyListeners();
   }
 
-  /// Remove all readers
-  void clearReaders() {
+  /// Remove all readers with proper disposal
+  Future<void> clearReaders() async {
+    // Dispose all readers before clearing to prevent resource leaks
+    for (final reader in _readers) {
+      await reader.disconnect();
+    }
     _readers.clear();
     _latestReadings.clear();
     notifyListeners();

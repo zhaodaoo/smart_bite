@@ -50,11 +50,12 @@ Future<void> main() async {
 /// because captureFromWidget() creates an isolated rendering context with its own
 /// image cache, separate from the main UI's ImageCache.
 Future<void> _preloadPDFAssets() async {
+  ScreenshotController? controller;
   try {
     debugPrint('🔄 Starting PDF assets preloading...');
     
     // Import is available at the top
-    final ScreenshotController controller = ScreenshotController();
+    controller = ScreenshotController();
     
     // Create dummy widgets with both background images to warm up the cache
     final warmupWidget1 = Container(
@@ -100,6 +101,9 @@ Future<void> _preloadPDFAssets() async {
     // Non-fatal: Log warning but don't block app startup
     debugPrint('⚠ Failed to preload PDF assets: $e');
   }
+  // Note: ScreenshotController doesn't require explicit disposal
+  // It only manages a GlobalKey which is garbage collected automatically
+  // The ui.Image objects are disposed within captureFromWidget()
 }
 
 class MyApp extends StatelessWidget {

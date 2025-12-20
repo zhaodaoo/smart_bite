@@ -20,12 +20,20 @@ class DataPersistenceService {
     required Map<NutritionType, double> intakeFoodTypeDailyProportion,
     required Map<NutritionType, String> ranksByFoodType,
   }) async {
+    File? file;
     try {
-      final file = await _getLocalFile();
+      file = await _getLocalFile();
       var dateUtc = DateTime.now().toUtc();
       var dateLocal = dateUtc.toLocal();
+      
+      // Handle empty orderNames (acceptable scenario - user didn't order)
+      final orderNamesStr = orderNames.isEmpty ? '未點餐' : orderNames.join(',');
+      if (orderNames.isEmpty) {
+        debugPrint('📋 Saving analysis record with zero meals (user did not order)');
+      }
+      
       String outputString =
-          '$dateLocal, ${getAgeLabel(age)}, ${getSexLabel(sex)}, ${getActivityLevelLabel(activityLevel)}, ${orderNames.join(',')}, "$overallComment", "$intakeFoodType", "$intakeFoodTypeDailyProportion", "$ranksByFoodType"\r\n';
+          '$dateLocal, ${getAgeLabel(age)}, ${getSexLabel(sex)}, ${getActivityLevelLabel(activityLevel)}, $orderNamesStr, "$overallComment", "$intakeFoodType", "$intakeFoodTypeDailyProportion", "$ranksByFoodType"\r\n';
       debugPrint('outputString = $outputString');
 
       if (await file.exists()) {
@@ -35,11 +43,13 @@ class DataPersistenceService {
       }
       await file.writeAsString(Platform.lineTerminator, mode: FileMode.append);
 
-      debugPrint('Data saved successfully to ${file.path}');
+      debugPrint('✓ Data saved successfully to ${file.path}');
     } catch (e) {
-      debugPrint('Error saving data: $e');
-      throw DataPersistenceException('Failed to save data: ${e.toString()}');
+      debugPrint('❌ Error saving data: $e');
+      // Ensure proper error propagation with context
+      throw DataPersistenceException('Failed to save analysis data to ${file?.path ?? "unknown path"}: ${e.toString()}');
     }
+    // Note: Dart automatically closes file handles, but we maintain reference for error reporting
   }
 
   /// Gets the local path for application documents.

@@ -83,8 +83,25 @@ class RFIDReaderProvider extends ChangeNotifier {
       // Identify meals from valid readings
       _orderNames = _mealService.identifyMealsFromReadings(readings);
       
-      debugPrint('Scan complete: ${_orderNames.length} meals identified');
-      debugPrint('Meals: $_orderNames');
+      // Enhanced logging for analytics - distinguish different empty scenarios
+      if (_orderNames.isEmpty) {
+        final totalReadings = readings.length;
+        final validReadings = readings.where((r) => r.hasCard).length;
+        final errorReadings = readings.where((r) => r.status == ReaderStatus.error).length;
+        
+        if (totalReadings == 0) {
+          debugPrint('📊 Analytics: No RFID scan performed (0 readers configured)');
+        } else if (errorReadings > 0) {
+          debugPrint('📊 Analytics: RFID scan completed but encountered $errorReadings errors, 0 meals identified');
+        } else if (validReadings == 0) {
+          debugPrint('📊 Analytics: RFID scan completed, no cards detected (user did not place any dishes)');
+        } else {
+          debugPrint('📊 Analytics: RFID scan completed, $validReadings cards detected but no meals identified (unknown cards)');
+        }
+      } else {
+        debugPrint('✓ Scan complete: ${_orderNames.length} meals identified');
+        debugPrint('  Meals: $_orderNames');
+      }
       
     } catch (e) {
       debugPrint('Error during scan: $e');

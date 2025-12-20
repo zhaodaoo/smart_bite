@@ -156,6 +156,7 @@ class GPIOSPIRFIDReaderManager extends ChangeNotifier implements RFIDReaderManag
   }
 
   /// Static method for isolate execution (no instance state access)
+  /// Enhanced with timeout protection and comprehensive error recovery
   static Future<List<String>> _performScanInIsolate(List<Map<String, int>> configsData) async {
     // Create ReaderConfig objects from serialized data
     final readerConfigs = configsData
@@ -166,12 +167,26 @@ class GPIOSPIRFIDReaderManager extends ChangeNotifier implements RFIDReaderManag
             ))
         .toList();
     
-    // Perform the actual GPIO operations
+    // Perform the actual GPIO operations with timeout protection
     final pollingService = RFIDPollingService();
     try {
-      final tagIds = await pollingService.performOneLoopCycles(readerConfigs);
-      return tagIds;
+      // Add timeout to prevent isolate from hanging indefinitely
+      return await pollingService
+          .performOneLoopCycles(readerConfigs)
+          .timeout(
+            const Duration(seconds: 30),
+            onTimeout: () {
+              debugPrint('⚠️  RFID scan timeout in isolate, disposing resources');
+              pollingService.dispose();
+              throw TimeoutException('RFID scan timeout after 30 seconds');
+            },
+          );
+    } catch (e) {
+      debugPrint('❌ Error in isolate scan: $e');
+      pollingService.dispose();
+      rethrow;
     } finally {
+      // Ensure disposal even if timeout handler didn't execute
       pollingService.dispose();
     }
   }

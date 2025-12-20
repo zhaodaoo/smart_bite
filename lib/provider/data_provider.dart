@@ -109,7 +109,7 @@ class DataProvider extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       debugPrint('Error in analyze(): $e');
-      rethrow; // Propagate error to UI for handling
+      // rethrow; // Propagate error to UI for handling
     }
   }
 

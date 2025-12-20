@@ -19,9 +19,9 @@ class NutritionAnalysisService {
     required ActivityLevel activityLevel,
   }) async {
     try {
-      // Validate input
+      // Log empty order scenario for analytics (acceptable behavior)
       if (orderNames.isEmpty) {
-        throw NutritionAnalysisException('No meals selected for analysis');
+        debugPrint('⚠️  Analysis requested with zero meals - proceeding with nutritional needs calculation only');
       }
 
       // Intake meal labels and foods
@@ -104,7 +104,7 @@ class NutritionAnalysisService {
     String organicLabelDishes = '';
     String organicLabelFood = '菠菜';
     bool organicLabelDishesIsDefault = true;
-    String traceableLabelDishes = '櫛瓜蒸蛋（舉例）';
+    String traceableLabelDishes = '';
     String traceableLabelFood = '櫛瓜';
     bool traceableLabelDishesIsDefault = true;
 
@@ -161,8 +161,16 @@ class NutritionAnalysisService {
 
   /// Calculates total nutrition from ordered meals.
   /// Optimized to use pre-indexed DishNutrition objects for faster access.
+  /// Returns zero values for all nutrients if orderNames is empty (valid scenario).
   static Map<NutritionType, double> _calculateTotalNutrition(
       List<String> orderNames) {
+    // Handle empty orders - return zero nutrition (user didn't order)
+    if (orderNames.isEmpty) {
+      return Map.fromEntries(
+        NutritionType.values.map((type) => MapEntry(type, 0.0))
+      );
+    }
+
     // Use optimized index for O(1) lookup instead of sequential map access
     List<DishNutrition?> eachMealNutrition =
         orderNames.map((name) => OptimizedDishesInfo.get(name)).toList();

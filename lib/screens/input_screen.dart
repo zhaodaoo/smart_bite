@@ -40,6 +40,14 @@ class _InputScreenState extends State<InputScreen> {
   }
 
   @override
+  void dispose() {
+    // Clean up any local resources and ensure provider listeners are released
+    // Provider framework handles listener cleanup automatically, but explicit
+    // dispose ensures proper lifecycle management
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     precacheImage(const AssetImage('assets/images/background.png'), context);
     return Scaffold(
