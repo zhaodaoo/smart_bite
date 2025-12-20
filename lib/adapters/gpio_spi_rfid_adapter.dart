@@ -9,7 +9,7 @@
 library;
 
 import 'dart:async';
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import '../interfaces/rfid_reader.dart';
 import '../models/rfid_models.dart';
 import '../services/rfid_polling_service.dart';
@@ -50,7 +50,6 @@ class RC522Config {
 class GPIOSPIRFIDReaderManager extends ChangeNotifier implements RFIDReaderManager {
   final List<RC522Config> _configs;
   final Map<String, RFIDReading> _latestReadings = {};
-  final RFIDPollingService _pollingService = RFIDPollingService();
 
   /// Default configuration for 7 RC522 modules on Raspberry Pi
   /// 
@@ -89,22 +88,26 @@ class GPIOSPIRFIDReaderManager extends ChangeNotifier implements RFIDReaderManag
 
   @override
   Future<List<RFIDReading>> scanAll() async {
-    debugPrint('Starting scan of ${_configs.length} readers...');
+    debugPrint('Starting async scan of ${_configs.length} readers...');
     
     try {
-      // Convert configs to ReaderConfig format
-      final readerConfigs = _configs
+      // Convert configs to serializable format for isolate
+      final configsData = _configs
           .asMap()
           .entries
-          .map((entry) => entry.value.toReaderConfig(entry.key + 1))
+          .map((entry) => {
+                'deviceNum': entry.key + 1,
+                'spiNum': entry.value.spiNum,
+                'rstPin': entry.value.rstPin,
+              })
           .toList();
       
-      // Perform button-triggered reading using proven implementation
-      final tagIds = await _pollingService.performOneLoopCycles(readerConfigs);
+      // Perform scan on background isolate to avoid UI blocking
+      final tagIds = await compute(_performScanInIsolate, configsData);
       
       debugPrint('Scan complete. Found ${tagIds.length} unique tags: $tagIds');
       
-      // Convert tag IDs to RFIDReading objects
+      // Convert tag IDs to RFIDReading objects (on main thread)
       final readings = <RFIDReading>[];
       _latestReadings.clear();
       
@@ -113,8 +116,6 @@ class GPIOSPIRFIDReaderManager extends ChangeNotifier implements RFIDReaderManag
         final config = _configs[i];
         
         // Check if this reader detected a tag
-        // Note: We don't know which specific reader detected which tag,
-        // so we distribute tags across readers for display purposes
         final hasTag = i < tagIds.length;
         
         final reading = hasTag
@@ -154,6 +155,27 @@ class GPIOSPIRFIDReaderManager extends ChangeNotifier implements RFIDReaderManag
     }
   }
 
+  /// Static method for isolate execution (no instance state access)
+  static Future<List<String>> _performScanInIsolate(List<Map<String, int>> configsData) async {
+    // Create ReaderConfig objects from serialized data
+    final readerConfigs = configsData
+        .map((data) => ReaderConfig(
+              deviceNum: data['deviceNum']!,
+              spiNum: data['spiNum']!,
+              rstPin: data['rstPin']!,
+            ))
+        .toList();
+    
+    // Perform the actual GPIO operations
+    final pollingService = RFIDPollingService();
+    try {
+      final tagIds = await pollingService.performOneLoopCycles(readerConfigs);
+      return tagIds;
+    } finally {
+      pollingService.dispose();
+    }
+  }
+
   @override
   RFIDReading? getReading(String deviceId) {
     return _latestReadings[deviceId];
@@ -168,7 +190,6 @@ class GPIOSPIRFIDReaderManager extends ChangeNotifier implements RFIDReaderManag
 
   @override
   void dispose() {
-    _pollingService.dispose();
     _latestReadings.clear();
     super.dispose();
   }

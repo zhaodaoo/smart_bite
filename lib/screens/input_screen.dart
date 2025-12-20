@@ -399,37 +399,46 @@ class ConfirmPage extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.fromLTRB(180, 0, 180, 0),
           child: Wrap(
-              // spacing: 8,
               direction: Axis.horizontal,
               alignment: WrapAlignment.spaceBetween,
               crossAxisAlignment: WrapCrossAlignment.center,
-              children: context.select<DataProvider, List<_InfoCard>>((provider) {
-                return [
-                  _InfoCard(
-                      icon: switch (provider.meal) {
+              children: [
+                Selector<DataProvider, Meal>(
+                  selector: (_, provider) => provider.meal,
+                  builder: (_, meal, __) => _InfoCard(
+                      icon: switch (meal) {
                         Meal.breakfast => Icons.breakfast_dining,
                         Meal.lunch => Icons.lunch_dining,
                         Meal.dinnder => Icons.dinner_dining,
                       },
-                      title: getMealLabel(provider.meal),
+                      title: getMealLabel(meal),
                       subtitle: '這是哪一餐'),
-                  _InfoCard(
-                      icon: switch (provider.sex) {
+                ),
+                Selector<DataProvider, Sex>(
+                  selector: (_, provider) => provider.sex,
+                  builder: (_, sex, __) => _InfoCard(
+                      icon: switch (sex) {
                         Sex.female => Icons.female,
                         Sex.male => Icons.male,
                       },
-                      title: getSexLabel(provider.sex),
+                      title: getSexLabel(sex),
                       subtitle: '性別'),
-                  _InfoCard(
+                ),
+                Selector<DataProvider, Age>(
+                  selector: (_, provider) => provider.age,
+                  builder: (_, age, __) => _InfoCard(
                       icon: Icons.numbers,
-                      title: getAgeLabel(provider.age),
+                      title: getAgeLabel(age),
                       subtitle: '年齡'),
-                  _InfoCard(
+                ),
+                Selector<DataProvider, ActivityLevel>(
+                  selector: (_, provider) => provider.activityLevel,
+                  builder: (_, activityLevel, __) => _InfoCard(
                       icon: Icons.directions_run,
-                      title: getActivityLevelLabel(provider.activityLevel),
+                      title: getActivityLevelLabel(activityLevel),
                       subtitle: '生活活動強度'),
-                ];
-              })),
+                ),
+              ]),
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
