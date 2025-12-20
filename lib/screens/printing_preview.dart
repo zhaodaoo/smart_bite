@@ -31,6 +31,7 @@ class MyApp extends StatelessWidget {
     );
   }
 
+  // ignore: unused_element
   Future<Uint8List> _generateMockReportPdf(PdfPageFormat format) async {
     // 載入中文字體
     final fontData = await rootBundle.load('assets/fonts/NotoSansCJK-Regular.otf');
@@ -860,6 +861,7 @@ Future<Uint8List> _generateMockLabelPdf(PdfPageFormat format) async {
           marginLeft: 0.3 * PdfPageFormat.cm,
           marginRight: 0.3 * PdfPageFormat.cm,
           marginTop: 0.3 * PdfPageFormat.cm),
+      theme: pw.ThemeData.withFont(base: ttf),
       build: (context) {
         return pw.Center(
           child: pw.Image(

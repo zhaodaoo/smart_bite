@@ -137,36 +137,24 @@ class _InputScreenState extends State<InputScreen> {
                         _currentPage = Page.analyzingPage;
                       });
                       await context.read<DataProvider>().analyze();
-
-                      // Start Printing analysis result
-                      Printing.directPrintPdf(
-                          printer: Printer(
-                              // ignore: use_build_context_synchronously
-                              url: context.read<DataProvider>().printerName),
-                          format: PdfPageFormat.a4.landscape,
-                          usePrinterSettings: true,
-                          onLayout: (format) => context
-                              .read<DataProvider>()
-                              .generateReportPdf(format));
-
-                      // Start printing label info page
-                      Printing.directPrintPdf(
-                          printer: Printer(
-                              // ignore: use_build_context_synchronously
-                              url: context.read<DataProvider>().printerName),
-                          format: PdfPageFormat.a4.landscape,
-                          usePrinterSettings: true,
-                          onLayout: (format) => context
-                              .read<DataProvider>()
-                              .generateLabelPdf(format));
-
                       // ignore: use_build_context_synchronously
                       await context.read<DataProvider>().saveData();
+                      // Start printing combined PDF (nutrition report + label info)
+                      Printing.directPrintPdf(
+                          printer: Printer(
+                              // ignore: use_build_context_synchronously
+                              url: context.read<DataProvider>().printerName),
+                          format: PdfPageFormat.a4.landscape,
+                          usePrinterSettings: true,
+                          onLayout: (format) => context
+                              .read<DataProvider>()
+                              .generateCombinedPdf(format));
                       await Future.delayed(const Duration(seconds: 3));
+
                       setState(() {
                         _currentPage = Page.printingPage;
                       });
-                      await Future.delayed(const Duration(seconds: 25));
+                      await Future.delayed(const Duration(seconds: 12));
 
                       setState(() {
                         // 進入初始化頁面
@@ -174,7 +162,7 @@ class _InputScreenState extends State<InputScreen> {
                       });
                       // ignore: use_build_context_synchronously
                       await context.read<DataProvider>().initialize();
-                      await Future.delayed(const Duration(seconds: 2));
+                      await Future.delayed(const Duration(seconds: 3));
                       setState(() {
                         _currentPage = Page.homePage;
                       });
@@ -284,13 +272,10 @@ class ConfirmPage extends StatelessWidget {
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: List<OrderCard>.generate(
                           provider.orderNames.length, (index) {
-                        return OrderCard(
-                            mealName: provider.orderNames[index]);
+                        return OrderCard(mealName: provider.orderNames[index]);
                       })),
                 )
-              : const OrderCard(
-                  width: 400,
-                  mealName: '沒收到你的點餐，難道...吃空氣？');
+              : const OrderCard(width: 400, mealName: '沒收到你的點餐，難道...吃空氣？');
         }),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,

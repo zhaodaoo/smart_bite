@@ -38,7 +38,6 @@ lib/
 │   └── rfid_reader_provider.dart # RFID reader state management
 ├── screens/                     # UI layer
 │   ├── input_screen.dart        # User input interface
-│   ├── loading_screen.dart      # Loading/splash screen
 │   ├── printing_preview.dart    # Print preview for reports
 │   └── setting_screen.dart      # App configuration
 ├── services/                    # Business logic services

@@ -146,6 +146,33 @@ class DataProvider extends ChangeNotifier {
     }
   }
 
+  /// Generates a combined PDF with both nutrition report and label pages.
+  ///
+  /// Creates a single PDF document with 2 pages. If either page fails,
+  /// only successfully generated pages will be included.
+  ///
+  /// Throws [Exception] if analysis hasn't been performed or if both pages fail.
+  Future<Uint8List> generateCombinedPdf(PdfPageFormat format) async {
+    if (_analysisResult == null) {
+      throw Exception(
+          'Analysis must be performed before generating combined PDF');
+    }
+    try {
+      return await PDFGenerationService.generateCombinedPdf(
+        format: format,
+        analysisResult: _analysisResult!,
+        orderNames: orderNames,
+        meal: _meal,
+        sex: _sex,
+        age: _age,
+        activityLevel: _activityLevel,
+      );
+    } catch (e) {
+      debugPrint('Error generating combined PDF: $e');
+      rethrow; // Propagate error to UI for handling
+    }
+  }
+
   /// Initializes/resets the provider state.
   Future<void> initialize() async {
     _meal = Meal.lunch;

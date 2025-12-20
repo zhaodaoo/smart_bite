@@ -17,6 +17,7 @@ void main() {
       // Test case 1: Standard UID
       // [0xA2, 0x20, 0x38, 0xF6] should become "A22038F6"
       final uid1 = [0xA2, 0x20, 0x38, 0xF6];
+      // ignore: unused_local_variable
       final hex1 = reader.toString(); // This is just a placeholder test structure
       
       // Since we can't easily test private methods, we'll document expected behavior:
