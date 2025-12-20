@@ -57,9 +57,6 @@ class SettingPage extends StatelessWidget {
         // Platform Info
         _buildPlatformInfo(context),
         
-        // Scan Timeout Slider
-        _buildScanTimeoutSlider(context, rfidProvider),
-        
         // Reader Status Cards
         _buildReaderStatusSection(context, rfidProvider),
         
@@ -112,37 +109,6 @@ class SettingPage extends StatelessWidget {
       case PlatformType.unknown:
         return Icons.help_outline;
     }
-  }
-
-  Widget _buildScanTimeoutSlider(
-    BuildContext context,
-    RFIDReaderProvider provider,
-  ) {
-    return Column(
-      children: [
-        Text(
-          'RFID Scan Timeout',
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(40, 0, 40, 0),
-          child: Slider(
-            value: provider.scanTimeout,
-            max: 20,
-            min: 1,
-            divisions: 19,
-            label: '${provider.scanTimeout.round()}s',
-            onChanged: (double value) {
-              provider.scanTimeout = value;
-            },
-          ),
-        ),
-        Text(
-          '${provider.scanTimeout.round()} seconds',
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
-      ],
-    );
   }
 
   Widget _buildReaderStatusSection(

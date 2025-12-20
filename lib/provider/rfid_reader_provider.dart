@@ -34,9 +34,6 @@ class RFIDReaderProvider extends ChangeNotifier {
   /// List of all RFID readers
   List<RFIDReader> get readers => _readerManager.readers;
 
-  /// Scan timeout in seconds
-  double get scanTimeout => _readerManager.scanTimeout;
-
   /// List of identified meal names from last scan
   List<String> get orderNames => List.unmodifiable(_orderNames);
 
@@ -48,13 +45,6 @@ class RFIDReaderProvider extends ChangeNotifier {
 
   /// Number of valid cards detected in last scan
   int get validCardCount => _orderNames.length;
-
-  // ========== Setters ==========
-
-  set scanTimeout(double seconds) {
-    _readerManager.scanTimeout = seconds;
-    notifyListeners();
-  }
 
   // ========== Methods ==========
 

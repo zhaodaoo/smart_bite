@@ -131,7 +131,6 @@ class MockRFIDAdapter implements RFIDReader {
 /// Mock RFID Reader Manager with predefined test data
 class MockRFIDReaderManager extends ChangeNotifier implements RFIDReaderManager {
   List<MockRFIDAdapter> _readers = [];
-  double _scanTimeout = 3.0;
   final Map<String, RFIDReading> _latestReadings = {};
 
   /// Create a manager with predefined test scenario
@@ -190,15 +189,6 @@ class MockRFIDReaderManager extends ChangeNotifier implements RFIDReaderManager 
 
   @override
   List<RFIDReader> get readers => _readers;
-
-  @override
-  double get scanTimeout => _scanTimeout;
-
-  @override
-  set scanTimeout(double seconds) {
-    _scanTimeout = seconds;
-    notifyListeners();
-  }
 
   @override
   Future<void> discoverReaders() async {

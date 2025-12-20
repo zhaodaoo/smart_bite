@@ -153,10 +153,6 @@ abstract class RFIDReaderManager extends ChangeNotifier {
   /// List of all managed RFID readers
   List<RFIDReader> get readers;
   
-  /// Timeout duration for scanning operations (in seconds)
-  double get scanTimeout;
-  set scanTimeout(double seconds);
-  
   /// Discover and initialize all available readers
   /// - For Serial: Scans for available COM/USB ports
   /// - For GPIO: Initializes configured SPI devices

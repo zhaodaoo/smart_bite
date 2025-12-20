@@ -49,7 +49,6 @@ class RC522Config {
 /// Uses the button-triggered list-return pattern from read_multi_rfid
 class GPIOSPIRFIDReaderManager extends ChangeNotifier implements RFIDReaderManager {
   final List<RC522Config> _configs;
-  double _scanTimeout = 2.0;
   final Map<String, RFIDReading> _latestReadings = {};
   final RFIDPollingService _pollingService = RFIDPollingService();
 
@@ -79,15 +78,6 @@ class GPIOSPIRFIDReaderManager extends ChangeNotifier implements RFIDReaderManag
 
   @override
   List<RFIDReader> get readers => [];  // Not used in button-triggered mode
-
-  @override
-  double get scanTimeout => _scanTimeout;
-
-  @override
-  set scanTimeout(double seconds) {
-    _scanTimeout = seconds;
-    notifyListeners();
-  }
 
   @override
   Future<void> discoverReaders() async {

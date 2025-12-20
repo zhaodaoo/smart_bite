@@ -143,15 +143,11 @@ class RFIDReaderConfig {
   
   /// Custom GPIO configurations for Raspberry Pi
   final List<RC522Config>? customGPIOConfigs;
-  
-  /// Scan timeout in seconds
-  final double scanTimeout;
 
   const RFIDReaderConfig({
     this.forcePlatform,
     this.mockScenario = 'full_meal',
     this.customGPIOConfigs,
-    this.scanTimeout = 10.0,
   });
 
   /// Create reader manager from this configuration
@@ -171,7 +167,6 @@ class RFIDReaderConfig {
       );
     }
 
-    manager.scanTimeout = scanTimeout;
     return manager;
   }
 }

@@ -149,7 +149,6 @@ New provider replacing `SerialPortsProvider`:
 ```dart
 List<RFIDReader> get readers
 List<String> get orderNames
-double get scanTimeout
 bool get isScanning
 int get readerCount
 int get validCardCount

@@ -324,10 +324,9 @@ RFID_MODE=gpio flutter run
 
 ### Optimization Tips
 
-1. Reduce scan timeout for GPIO: `provider.scanTimeout = 2.0`
-2. Ensure proper RC522 antenna configuration
-3. Use shorter cables for SPI connections
-4. Minimize electrical noise near RFID modules
+1. Ensure proper RC522 antenna configuration
+2. Use shorter cables for SPI connections
+3. Minimize electrical noise near RFID modules
 
 ## API Reference
 
@@ -352,7 +351,6 @@ class RFIDReading {
 class RFIDReaderProvider {
   List<RFIDReader> get readers;
   List<String> get orderNames;
-  double get scanTimeout;
   bool get isScanning;
   int get readerCount;
   int get validCardCount;

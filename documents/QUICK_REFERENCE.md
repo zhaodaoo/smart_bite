@@ -108,12 +108,6 @@ Map<String, int> stats = service.getIdentificationStats(readings);
 
 **Shared SPI:** MISO=GPIO9, MOSI=GPIO10, SCK=GPIO11
 
-### Scan Timeout
-
-```dart
-provider.scanTimeout = 5.0; // 5 seconds
-```
-
 ## 🧪 Testing
 
 ### Run with Mock Scenarios
@@ -267,7 +261,6 @@ try {
 
 ### Serial Mode
 - Default timeout: 10s
-- Adjust: `provider.scanTimeout = 5.0`
 - All 7 readers scan in parallel
 
 ### GPIO Mode (when implemented)

@@ -77,7 +77,6 @@ Wraps existing Arduino + USB Serial logic:
 ```dart
 final adapter = SerialRFIDAdapter(
   address: '/dev/ttyUSB0',
-  scanTimeout: 10.0,
 );
 await adapter.connect();
 final reading = await adapter.scan();
@@ -489,13 +488,6 @@ final customConfigs = [
 ];
 
 final manager = GPIOSPIRFIDReaderManager(configs: customConfigs);
-```
-
-### Scan Timeout Adjustment
-
-```dart
-final provider = RFIDReaderProvider(readerManager: manager);
-provider.scanTimeout = 5.0; // 5 seconds per scan
 ```
 
 ---
