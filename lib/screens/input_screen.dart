@@ -362,7 +362,7 @@ class OrderPage extends StatelessWidget {
               onPressed: onGoBack,
               label: '返回',
             ),
-            const SizedBox(width: 61),
+            const SizedBox(width: 22),
             _SubmitButton(
               onPressed: context.watch<RFIDReaderProvider>().isScanning
                   ? null
@@ -371,7 +371,7 @@ class OrderPage extends StatelessWidget {
                     },
               label: '重新感應',
             ),
-            const SizedBox(width: 61),
+            const SizedBox(width: 22),
             _SubmitButton(
               onPressed: context.watch<RFIDReaderProvider>().isScanning
                   ? null
