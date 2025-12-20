@@ -25,13 +25,14 @@ class DataPersistenceService {
       file = await _getLocalFile();
       var dateUtc = DateTime.now().toUtc();
       var dateLocal = dateUtc.toLocal();
-      
+
       // Handle empty orderNames (acceptable scenario - user didn't order)
       final orderNamesStr = orderNames.isEmpty ? '未點餐' : orderNames.join(',');
       if (orderNames.isEmpty) {
-        debugPrint('📋 Saving analysis record with zero meals (user did not order)');
+        debugPrint(
+            '📋 Saving analysis record with zero meals (user did not order)');
       }
-      
+
       String outputString =
           '$dateLocal, ${getAgeLabel(age)}, ${getSexLabel(sex)}, ${getActivityLevelLabel(activityLevel)}, $orderNamesStr, "$overallComment", "$intakeFoodType", "$intakeFoodTypeDailyProportion", "$ranksByFoodType"\r\n';
       debugPrint('outputString = $outputString');
@@ -47,7 +48,8 @@ class DataPersistenceService {
     } catch (e) {
       debugPrint('❌ Error saving data: $e');
       // Ensure proper error propagation with context
-      throw DataPersistenceException('Failed to save analysis data to ${file?.path ?? "unknown path"}: ${e.toString()}');
+      throw DataPersistenceException(
+          'Failed to save analysis data to ${file?.path ?? "unknown path"}: ${e.toString()}');
     }
     // Note: Dart automatically closes file handles, but we maintain reference for error reporting
   }
@@ -108,7 +110,8 @@ class DataPersistenceService {
       debugPrint('✓ includeLabelPage preference saved: $value');
     } catch (e) {
       debugPrint('❌ Error saving includeLabelPage preference: $e');
-      throw DataPersistenceException('Failed to save includeLabelPage preference: ${e.toString()}');
+      throw DataPersistenceException(
+          'Failed to save includeLabelPage preference: ${e.toString()}');
     }
   }
 
@@ -124,10 +127,12 @@ class DataPersistenceService {
         debugPrint('✓ includeLabelPage preference loaded: $value');
         return value;
       }
-      debugPrint('ℹ includeLabelPage preference file not found, using default: false');
+      debugPrint(
+          'ℹ includeLabelPage preference file not found, using default: false');
       return false; // Default: only print report
     } catch (e) {
-      debugPrint('❌ Error loading includeLabelPage preference: $e, using default: false');
+      debugPrint(
+          '❌ Error loading includeLabelPage preference: $e, using default: false');
       return false; // Default on error
     }
   }
@@ -136,6 +141,51 @@ class DataPersistenceService {
   static Future<File> _getPreferencesFile() async {
     final path = await _getLocalPath();
     return File('$path/preferences.txt');
+  }
+
+  /// Saves the printer name preference.
+  ///
+  /// Throws [DataPersistenceException] if save fails.
+  static Future<void> savePrinterName(String printerName) async {
+    try {
+      final file = await _getPrinterNameFile();
+      await file.writeAsString(printerName);
+      debugPrint('✓ Printer name preference saved: $printerName');
+    } catch (e) {
+      debugPrint('❌ Error saving printer name preference: $e');
+      throw DataPersistenceException(
+          'Failed to save printer name preference: ${e.toString()}');
+    }
+  }
+
+  /// Loads the printer name preference.
+  ///
+  /// Returns 'SmartBite' (default) if file doesn't exist or is empty.
+  static Future<String> loadPrinterName() async {
+    try {
+      final file = await _getPrinterNameFile();
+      if (await file.exists()) {
+        final content = await file.readAsString();
+        final printerName = content.trim();
+        if (printerName.isNotEmpty) {
+          debugPrint('✓ Printer name preference loaded: $printerName');
+          return printerName;
+        }
+      }
+      debugPrint(
+          'ℹ Printer name preference file not found, using default: SmartBite');
+      return 'SmartBite'; // Default printer name
+    } catch (e) {
+      debugPrint(
+          '❌ Error loading printer name preference: $e, using default: SmartBite');
+      return 'SmartBite'; // Default on error
+    }
+  }
+
+  /// Gets the file for storing printer name.
+  static Future<File> _getPrinterNameFile() async {
+    final path = await _getLocalPath();
+    return File('$path/printer_name.txt');
   }
 }
 

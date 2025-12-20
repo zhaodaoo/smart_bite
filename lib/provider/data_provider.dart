@@ -12,7 +12,7 @@ import 'package:smart_bite/services/data_persistence_service.dart';
 /// DataProvider now focuses purely on UI state management.
 /// Business logic has been extracted to service classes.
 class DataProvider extends ChangeNotifier {
-  String _printerName = 'DCPT426W';
+  String _printerName = 'SmartBite';
   bool _includeLabelPage = false; // Default: only print report, not label
   Meal _meal = Meal.lunch;
   ActivityLevel _activityLevel = ActivityLevel.miderate;
@@ -73,6 +73,10 @@ class DataProvider extends ChangeNotifier {
   String get printerName => _printerName;
   set printerName(String input) {
     _printerName = input;
+    // Save printer name preference asynchronously
+    DataPersistenceService.savePrinterName(input).catchError((e) {
+      debugPrint('Failed to save printer name: $e');
+    });
     notifyListeners();
   }
 
@@ -193,8 +197,9 @@ class DataProvider extends ChangeNotifier {
     _age = Age.zeroToNine;
     orderNames = [];
     _analysisResult = null;
-    // Load saved includeLabelPage preference (defaults to false if not saved)
+    // Load saved preferences
     _includeLabelPage = await DataPersistenceService.loadIncludeLabelPage();
+    _printerName = await DataPersistenceService.loadPrinterName();
     notifyListeners();
   }
 

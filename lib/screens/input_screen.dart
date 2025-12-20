@@ -5,10 +5,11 @@ import 'package:smart_bite/data/constant.dart';
 import 'package:smart_bite/provider/data_provider.dart';
 import 'package:smart_bite/provider/rfid_reader_provider.dart';
 import 'package:smart_bite/widgets/setting_page.dart';
+import 'package:smart_bite/widgets/printer_not_found_dialog.dart';
 import 'package:smart_bite/interfaces/rfid_reader.dart';
+import 'package:smart_bite/services/printer_service.dart';
 
 import 'package:pdf/pdf.dart';
-import 'package:printing/printing.dart';
 
 enum Page {
   homePage,
@@ -141,21 +142,40 @@ class _InputScreenState extends State<InputScreen> {
                       });
                     },
                     onSubmit: () async {
+                      // Printer was already checked on HomePage, proceed with analysis
+                      final dataProvider = context.read<DataProvider>();
+                      final printerName = dataProvider.printerName;
+
                       setState(() {
                         _currentPage = Page.analyzingPage;
                       });
-                      await context.read<DataProvider>().analyze();
-                      // Start printing: combined PDF (report + label) or report only
-                      final dataProvider = context.read<DataProvider>();
-                      Printing.directPrintPdf(
-                          printer: Printer(
-                              // ignore: use_build_context_synchronously
-                              url: dataProvider.printerName),
+
+                      await dataProvider.analyze();
+
+                      // Print using the service with error handling
+                      try {
+                        await PrinterService.printPdf(
+                          printerName: printerName,
                           format: PdfPageFormat.a4.landscape,
                           usePrinterSettings: true,
-                          onLayout: (format) => dataProvider.includeLabelPage
-                              ? dataProvider.generateCombinedPdf(format)
-                              : dataProvider.generateReportPdf(format));
+                          onLayout: (PdfPageFormat format) =>
+                              dataProvider.includeLabelPage
+                                  ? dataProvider.generateCombinedPdf(format)
+                                  : dataProvider.generateReportPdf(format),
+                        );
+                      } catch (e) {
+                        debugPrint('❌ Printing error: $e');
+                        // If printer fails during printing (e.g., disconnected), show dialog
+                        // ignore: use_build_context_synchronously
+                        await showPrinterNotFoundDialog(context, printerName);
+                        // Return to order page
+                        setState(() {
+                          _currentPage = Page.orderPage;
+                        });
+                        return;
+                      }
+
+                      // Save data after successful printing
                       // ignore: use_build_context_synchronously
                       await context.read<DataProvider>().saveData();
                       await Future.delayed(const Duration(seconds: 4));
@@ -332,14 +352,18 @@ class OrderPage extends StatelessWidget {
             ),
             const SizedBox(width: 61),
             _SubmitButton(
-              onPressed: () async {
-                await context.read<RFIDReaderProvider>().updateReaders();
-              },
+              onPressed: context.watch<RFIDReaderProvider>().isScanning
+                  ? null
+                  : () async {
+                      await context.read<RFIDReaderProvider>().updateReaders();
+                    },
               label: '重新感應',
             ),
             const SizedBox(width: 61),
             _SubmitButton(
-              onPressed: () {
+              onPressed: context.watch<RFIDReaderProvider>().isScanning
+                  ? null
+                  : () {
                 // Transfer order data to DataProvider
                 final orderNames =
                     context.read<RFIDReaderProvider>().orderNames;
@@ -732,6 +756,10 @@ class _HomePageState extends State<HomePage> {
   bool isStart = false;
   @override
   Widget build(BuildContext context) {
+    final isScanning = context.select<RFIDReaderProvider, bool>(
+      (provider) => provider.isScanning,
+    );
+
     return Column(
       mainAxisSize: MainAxisSize.max,
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -747,15 +775,36 @@ class _HomePageState extends State<HomePage> {
                 height: 4,
               ),
         _SubmitButton(
-          onPressed: () async {
+          onPressed: (isStart || isScanning) ? null : () async {
             setState(() {
               isStart = true;
             });
+
+            // Check printer availability FIRST
+            final dataProvider = context.read<DataProvider>();
+            final printerName = dataProvider.printerName;
+
+            debugPrint('🔍 Checking printer "$printerName" on startup...');
+            final isPrinterAvailable =
+                await PrinterService.isPrinterAvailable(printerName);
+
+            if (!isPrinterAvailable) {
+              // Show printer not found dialog
+              // ignore: use_build_context_synchronously
+              await showPrinterNotFoundDialog(context, printerName);
+              // User canceled or went to settings, stay on home page
+              setState(() {
+                isStart = false;
+              });
+              return;
+            }
+
+            // Printer found, proceed with RFID reader initialization
             context.read<RFIDReaderProvider>().updateReaders();
             await Future.delayed(const Duration(seconds: 3));
             widget.onSubmit();
           },
-          label: '確認',
+          label: '開始',
         )
       ],
     );
@@ -763,7 +812,7 @@ class _HomePageState extends State<HomePage> {
 }
 
 class _SubmitButton extends StatelessWidget {
-  final void Function() onPressed;
+  final void Function()? onPressed;
   final String label;
 
   const _SubmitButton({required this.onPressed, required this.label});
@@ -837,7 +886,10 @@ class _ChoiceChip extends StatelessWidget {
   final void Function(bool) onSelected;
 
   const _ChoiceChip(
-      {this.icon, required this.label, required this.selected, required this.onSelected});
+      {this.icon,
+      required this.label,
+      required this.selected,
+      required this.onSelected});
 
   @override
   Widget build(BuildContext context) {
