@@ -76,7 +76,17 @@ class GPIOSPIRFIDReaderManager extends ChangeNotifier implements RFIDReaderManag
       : _configs = configs ?? defaultConfigs;
 
   @override
-  List<RFIDReader> get readers => [];  // Not used in button-triggered mode
+  List<RFIDReader> get readers {
+    // Return virtual readers based on configs
+    return _configs.map((config) {
+      final reading = _latestReadings[config.deviceId];
+      return _VirtualRFIDReader(
+        deviceId: config.deviceId,
+        status: reading?.status ?? ReaderStatus.init,
+        address: 'SPI${config.spiNum}.0/GPIO${config.rstPin}',
+      );
+    }).toList();
+  }
 
   @override
   Future<void> discoverReaders() async {
@@ -208,4 +218,45 @@ class GPIOSPIRFIDReaderManager extends ChangeNotifier implements RFIDReaderManag
     _latestReadings.clear();
     super.dispose();
   }
+}
+
+/// Virtual RFID reader for status display
+/// Used by GPIOSPIRFIDReaderManager to provide reader information
+/// without maintaining persistent connections
+class _VirtualRFIDReader implements RFIDReader {
+  @override
+  final String deviceId;
+  
+  @override
+  final ReaderStatus status;
+  
+  @override
+  final String address;
+
+  _VirtualRFIDReader({
+    required this.deviceId,
+    required this.status,
+    required this.address,
+  });
+
+  @override
+  Stream<RFIDReading> get readings => Stream.empty();
+
+  @override
+  Future<void> connect() async {
+    throw UnimplementedError('Virtual reader does not support connection');
+  }
+
+  @override
+  Future<void> disconnect() async {
+    throw UnimplementedError('Virtual reader does not support disconnection');
+  }
+
+  @override
+  Future<RFIDReading> scan() async {
+    throw UnimplementedError('Virtual reader does not support direct scanning');
+  }
+
+  @override
+  bool get isConnected => false;
 }

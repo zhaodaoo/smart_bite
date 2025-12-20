@@ -7,6 +7,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../provider/rfid_reader_provider.dart';
@@ -14,6 +15,7 @@ import '../provider/data_provider.dart';
 import '../interfaces/rfid_reader.dart';
 import '../utils/platform_detector.dart';
 import '../services/data_persistence_service.dart';
+import '../services/meal_identification_service.dart';
 
 class SettingPage extends StatelessWidget {
   const SettingPage({super.key});
@@ -116,6 +118,9 @@ class SettingPage extends StatelessWidget {
     BuildContext context,
     RFIDReaderProvider provider,
   ) {
+    // Create meal identification service instance
+    final mealService = MealIdentificationService();
+    
     return Column(
       children: [
         Text(
@@ -137,11 +142,24 @@ class SettingPage extends StatelessWidget {
               spacing: 8,
               runSpacing: 8,
               children: provider.readers
-                  .map((reader) => _ReaderStatusCard(
-                        deviceId: reader.deviceId,
-                        status: reader.status,
-                        address: reader.address,
-                      ))
+                  .map((reader) {
+                    final reading = provider.getReading(reader.deviceId);
+                    final rfidId = reading?.rfid ?? '';
+                    final dishName = rfidId.isNotEmpty 
+                        ? mealService.identifyMeal(rfidId)
+                        : null;
+                    
+                    // Use reading status if available, fallback to reader status
+                    final displayStatus = reading?.status ?? reader.status;
+                    
+                    return _ReaderStatusCard(
+                      deviceId: reader.deviceId,
+                      status: displayStatus,
+                      address: reader.address,
+                      rfidId: rfidId,
+                      dishName: dishName,
+                    );
+                  })
                   .toList(),
             ),
           ),
@@ -257,15 +275,22 @@ class _ReaderStatusCard extends StatelessWidget {
   final String deviceId;
   final ReaderStatus status;
   final String address;
+  final String rfidId;
+  final String? dishName;
 
   const _ReaderStatusCard({
     required this.deviceId,
     required this.status,
     required this.address,
+    required this.rfidId,
+    this.dishName,
   });
 
   @override
   Widget build(BuildContext context) {
+    final bool hasCard = rfidId.isNotEmpty && status == ReaderStatus.ok;
+    final bool noCard = status == ReaderStatus.ok && rfidId.isEmpty;
+    
     return Card(
       elevation: 2,
       child: Container(
@@ -273,7 +298,9 @@ class _ReaderStatusCard extends StatelessWidget {
         padding: const EdgeInsets.all(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
+            // Header: Icon and Reader ID
             Row(
               children: [
                 Icon(
@@ -292,6 +319,8 @@ class _ReaderStatusCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 8),
+            
+            // Status
             Text(
               status.displayName,
               style: TextStyle(
@@ -300,6 +329,8 @@ class _ReaderStatusCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 4),
+            
+            // Address
             Text(
               _getShortAddress(),
               style: TextStyle(
@@ -308,10 +339,96 @@ class _ReaderStatusCard extends StatelessWidget {
               ),
               overflow: TextOverflow.ellipsis,
             ),
+            
+            // Scan Results
+            if (hasCard) ..._buildCardDetectedInfo(context)
+            else if (noCard) ..._buildNoCardInfo(),
           ],
         ),
       ),
     );
+  }
+  
+  List<Widget> _buildCardDetectedInfo(BuildContext context) {
+    return [
+      const SizedBox(height: 8),
+      Container(
+        padding: const EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          color: Colors.green[50],
+          borderRadius: BorderRadius.circular(4),
+          border: Border.all(color: Colors.green[200]!),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // RFID ID with copy button
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    rfidId,
+                    style: const TextStyle(
+                      fontSize: 10,
+                      fontFamily: 'monospace',
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                InkWell(
+                  onTap: () {
+                    Clipboard.setData(ClipboardData(text: rfidId));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('已複製: $rfidId'),
+                        duration: const Duration(seconds: 1),
+                      ),
+                    );
+                  },
+                  child: Icon(
+                    Icons.copy,
+                    size: 14,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            // Dish name
+            Text(
+              dishName ?? '未知料理',
+              style: TextStyle(
+                fontSize: 10,
+                color: dishName != null ? Colors.green[900] : Colors.orange[900],
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+      ),
+    ];
+  }
+  
+  List<Widget> _buildNoCardInfo() {
+    return [
+      const SizedBox(height: 8),
+      Container(
+        padding: const EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          color: Colors.grey[100],
+          borderRadius: BorderRadius.circular(4),
+          border: Border.all(color: Colors.grey[300]!),
+        ),
+        child: const Text(
+          '未偵測到卡片',
+          style: TextStyle(
+            fontSize: 10,
+            color: Colors.grey,
+          ),
+        ),
+      ),
+    ];
   }
 
   IconData _getStatusIcon() {
