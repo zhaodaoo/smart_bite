@@ -305,7 +305,7 @@ class OrderPage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         const _HeadLine('6.這是您點的餐：'),
-        
+
         // Meal display section
         Padding(
           padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
@@ -332,7 +332,8 @@ class OrderPage extends StatelessWidget {
             _SubmitButton(
               onPressed: () {
                 // Transfer order data to DataProvider
-                final orderNames = context.read<RFIDReaderProvider>().orderNames;
+                final orderNames =
+                    context.read<RFIDReaderProvider>().orderNames;
                 context.read<DataProvider>().orderNames = orderNames;
                 onSubmit();
               },
@@ -395,38 +396,41 @@ class ConfirmPage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         const _HeadLine('5.資料確認'),
-        Wrap(
-            // spacing: 8,
-            direction: Axis.horizontal,
-            alignment: WrapAlignment.spaceBetween,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: context.select<DataProvider, List<_InfoCard>>((provider) {
-              return [
-                _InfoCard(
-                    icon: switch (provider.meal) {
-                      Meal.breakfast => Icons.breakfast_dining,
-                      Meal.lunch => Icons.lunch_dining,
-                      Meal.dinnder => Icons.dinner_dining,
-                    },
-                    title: getMealLabel(provider.meal),
-                    subtitle: '這是哪一餐'),
-                _InfoCard(
-                    icon: switch (provider.sex) {
-                      Sex.female => Icons.female,
-                      Sex.male => Icons.male,
-                    },
-                    title: getSexLabel(provider.sex),
-                    subtitle: '性別'),
-                _InfoCard(
-                    icon: Icons.numbers,
-                    title: getAgeLabel(provider.age),
-                    subtitle: '年齡'),
-                _InfoCard(
-                    icon: Icons.directions_run,
-                    title: getActivityLevelLabel(provider.activityLevel),
-                    subtitle: '生活活動強度'),
-              ];
-            })),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(180, 0, 180, 0),
+          child: Wrap(
+              // spacing: 8,
+              direction: Axis.horizontal,
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: context.select<DataProvider, List<_InfoCard>>((provider) {
+                return [
+                  _InfoCard(
+                      icon: switch (provider.meal) {
+                        Meal.breakfast => Icons.breakfast_dining,
+                        Meal.lunch => Icons.lunch_dining,
+                        Meal.dinnder => Icons.dinner_dining,
+                      },
+                      title: getMealLabel(provider.meal),
+                      subtitle: '這是哪一餐'),
+                  _InfoCard(
+                      icon: switch (provider.sex) {
+                        Sex.female => Icons.female,
+                        Sex.male => Icons.male,
+                      },
+                      title: getSexLabel(provider.sex),
+                      subtitle: '性別'),
+                  _InfoCard(
+                      icon: Icons.numbers,
+                      title: getAgeLabel(provider.age),
+                      subtitle: '年齡'),
+                  _InfoCard(
+                      icon: Icons.directions_run,
+                      title: getActivityLevelLabel(provider.activityLevel),
+                      subtitle: '生活活動強度'),
+                ];
+              })),
+        ),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -494,10 +498,13 @@ class ActivityLevelPage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         const _HeadLine('4.活動生活活動強度如何？'),
-        Wrap(
-            spacing: 8.0,
-            alignment: WrapAlignment.center,
-            children: getActivityChoices),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(180, 0, 180, 0),
+          child: Wrap(
+              spacing: 8.0,
+              alignment: WrapAlignment.center,
+              children: getActivityChoices),
+        ),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -534,10 +541,10 @@ class AgePage extends StatelessWidget {
       children: [
         const _HeadLine('3.請問您幾歲？'),
         Padding(
-          padding: const EdgeInsets.fromLTRB(240, 0, 240, 0),
+          padding: const EdgeInsets.fromLTRB(180, 0, 180, 0),
           child: Wrap(
             spacing: 8.0,
-            alignment: WrapAlignment.spaceBetween,
+            alignment: WrapAlignment.center,
             children: List<Widget>.generate(
               Age.values.length,
               (int index) {
@@ -545,7 +552,6 @@ class AgePage extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(0, 4, 0, 4),
                   child: _ChoiceChip(
                     label: getAgeLabel(Age.values[index]),
-                    icon: Icons.numbers,
                     selected: context.select<DataProvider, Age>(
                             (provider) => provider.age) ==
                         Age.values[index],
@@ -742,8 +748,7 @@ class _SubmitButton extends StatelessWidget {
   final void Function() onPressed;
   final String label;
 
-  const _SubmitButton(
-      {required this.onPressed, required this.label});
+  const _SubmitButton({required this.onPressed, required this.label});
 
   @override
   Widget build(BuildContext context) {
@@ -808,16 +813,13 @@ class _TileChoiceChip extends StatelessWidget {
 }
 
 class _ChoiceChip extends StatelessWidget {
-  final IconData icon;
+  final IconData? icon;
   final String label;
   final bool selected;
-  final void Function(bool)? onSelected;
+  final void Function(bool) onSelected;
 
   const _ChoiceChip(
-      {required this.icon,
-      required this.label,
-      required this.selected,
-      required this.onSelected});
+      {this.icon, required this.label, required this.selected, required this.onSelected});
 
   @override
   Widget build(BuildContext context) {
@@ -827,20 +829,18 @@ class _ChoiceChip extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-                  Icon(
-                    icon,
-                    size: Theme.of(context).textTheme.displayMedium!.fontSize,
-                  ),
-                  const SizedBox(
-                    width: 8,
-                  ),
-                  Text(label,
-                      style: TextStyle(
-                          fontSize: Theme.of(context)
-                              .textTheme
-                              .displayMedium!
-                              .fontSize)),
-                ]),
+            Icon(
+              icon,
+              size: Theme.of(context).textTheme.displayMedium!.fontSize,
+            ),
+            const SizedBox(
+              width: 8,
+            ),
+            Text(label,
+                style: TextStyle(
+                    fontSize:
+                        Theme.of(context).textTheme.displayMedium!.fontSize)),
+          ]),
       selected: selected,
       onSelected: onSelected,
     );
@@ -862,50 +862,33 @@ class _HeadLine extends StatelessWidget {
   }
 }
 
-// class _Info extends StatelessWidget {
-//   final String text;
-
-//   const _Info(this.text);
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Text(
-//       text,
-//       style: TextStyle(
-//           fontSize: Theme.of(context).textTheme.displaySmall!.fontSize),
-//     );
-//   }
-// }
-
 class _InfoCard extends StatelessWidget {
   final String title;
   final String subtitle;
   final IconData icon;
 
   const _InfoCard(
-      {required this.title,
-      required this.subtitle,
-      required this.icon});
+      {required this.title, required this.subtitle, required this.icon});
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 213,
+      width: 360,
       child: Card(
         child: ListTile(
           leading: Icon(
             icon,
             color: Theme.of(context).colorScheme.primary,
-            size: Theme.of(context).textTheme.displaySmall!.fontSize,
+            size: Theme.of(context).textTheme.displayLarge!.fontSize,
           ),
           title: Text(
             title,
             style: TextStyle(
-                fontSize: Theme.of(context).textTheme.titleLarge!.fontSize),
+                fontSize: Theme.of(context).textTheme.headlineLarge!.fontSize),
           ),
           subtitle: Text(
             subtitle,
             style: TextStyle(
-                fontSize: Theme.of(context).textTheme.bodyMedium!.fontSize),
+                fontSize: Theme.of(context).textTheme.bodyLarge!.fontSize),
           ),
         ),
       ),
