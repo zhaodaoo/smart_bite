@@ -800,6 +800,7 @@ class _HomePageState extends State<HomePage> {
             }
 
             // Printer found, proceed with RFID reader initialization
+            // ignore: use_build_context_synchronously
             context.read<RFIDReaderProvider>().updateReaders();
             await Future.delayed(const Duration(seconds: 3));
             widget.onSubmit();

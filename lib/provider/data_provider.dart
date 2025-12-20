@@ -8,6 +8,7 @@ import 'package:smart_bite/data/comments.dart';
 import 'package:smart_bite/services/nutrition_analysis_service.dart';
 import 'package:smart_bite/services/pdf_generation_service.dart';
 import 'package:smart_bite/services/data_persistence_service.dart';
+import 'package:smart_bite/services/printer_service.dart';
 
 /// DataProvider now focuses purely on UI state management.
 /// Business logic has been extracted to service classes.
@@ -200,6 +201,27 @@ class DataProvider extends ChangeNotifier {
     // Load saved preferences
     _includeLabelPage = await DataPersistenceService.loadIncludeLabelPage();
     _printerName = await DataPersistenceService.loadPrinterName();
+
+    // If no printer name is saved or it's the default 'SmartBite',
+    // try to use the system's default printer
+    if (_printerName.isEmpty || _printerName == 'SmartBite') {
+      try {
+        final defaultPrinter = await PrinterService.getDefaultPrinter();
+        if (defaultPrinter != null) {
+          _printerName = defaultPrinter.url;
+          // Save the default printer for future use
+          await DataPersistenceService.savePrinterName(_printerName);
+          debugPrint('✓ Auto-selected system default printer: $_printerName');
+        } else {
+          debugPrint(
+              'ℹ No system default printer found, using saved: $_printerName');
+        }
+      } catch (e) {
+        debugPrint('❌ Error auto-selecting default printer: $e');
+        // Keep the loaded printer name (fallback to 'SmartBite')
+      }
+    }
+
     notifyListeners();
   }
 

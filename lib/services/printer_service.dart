@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:pdf/pdf.dart';
@@ -55,6 +54,28 @@ class PrinterService {
     } catch (e) {
       debugPrint('❌ Error listing printers: $e');
       return [];
+    }
+  }
+
+  /// Gets the default printer on the system.
+  ///
+  /// Returns null if no default printer is set or an error occurs.
+  /// On most systems, the default printer is the first one in the list.
+  static Future<Printer?> getDefaultPrinter() async {
+    try {
+      final printers = await Printing.listPrinters();
+      if (printers.isEmpty) {
+        debugPrint('ℹ No printers available on system');
+        return null;
+      }
+
+      // The first printer in the list is typically the default printer
+      final defaultPrinter = printers.first;
+      debugPrint('✓ Default printer: ${defaultPrinter.name}');
+      return defaultPrinter;
+    } catch (e) {
+      debugPrint('❌ Error getting default printer: $e');
+      return null;
     }
   }
 

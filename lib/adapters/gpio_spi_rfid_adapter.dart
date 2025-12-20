@@ -240,7 +240,7 @@ class _VirtualRFIDReader implements RFIDReader {
   });
 
   @override
-  Stream<RFIDReading> get readings => Stream.empty();
+  Stream<RFIDReading> get readings => const Stream.empty();
 
   @override
   Future<void> connect() async {

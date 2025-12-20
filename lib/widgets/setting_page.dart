@@ -1,5 +1,5 @@
 /// Platform-Specific Settings Screen
-/// 
+///
 /// Displays different configuration options based on the platform:
 /// - Serial: Port addresses, baud rate, scan timeout
 /// - GPIO/SPI: Pin configurations, SPI settings
@@ -21,6 +21,7 @@ import '../services/data_persistence_service.dart';
 import '../services/meal_identification_service.dart';
 import '../services/pdf_generation_service.dart';
 import '../services/printer_service.dart';
+import 'printer_selection_dialog.dart';
 
 class SettingPage extends StatelessWidget {
   const SettingPage({super.key});
@@ -44,7 +45,7 @@ class SettingPage extends StatelessWidget {
             Expanded(
               child: _buildReaderSettingsColumn(context),
             ),
-            
+
             // Right column: Printer and Other Settings
             Expanded(
               child: _buildPrinterSettingsColumn(context),
@@ -64,10 +65,10 @@ class SettingPage extends StatelessWidget {
       children: [
         // Platform Info
         _buildPlatformInfo(context),
-        
+
         // Reader Status Cards
         _buildReaderStatusSection(context, rfidProvider),
-        
+
         // Refresh Button
         _buildRefreshButton(context, rfidProvider),
       ],
@@ -125,7 +126,7 @@ class SettingPage extends StatelessWidget {
   ) {
     // Create meal identification service instance
     final mealService = MealIdentificationService();
-    
+
     return Column(
       children: [
         Text(
@@ -133,12 +134,12 @@ class SettingPage extends StatelessWidget {
           style: Theme.of(context).textTheme.titleMedium,
         ),
         const SizedBox(height: 8),
-        
+
         // Statistics
         _buildReaderStats(context, provider),
-        
+
         const SizedBox(height: 16),
-        
+
         // Reader cards
         Center(
           child: Padding(
@@ -146,26 +147,23 @@ class SettingPage extends StatelessWidget {
             child: Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: provider.readers
-                  .map((reader) {
-                    final reading = provider.getReading(reader.deviceId);
-                    final rfidId = reading?.rfid ?? '';
-                    final dishName = rfidId.isNotEmpty 
-                        ? mealService.identifyMeal(rfidId)
-                        : null;
-                    
-                    // Use reading status if available, fallback to reader status
-                    final displayStatus = reading?.status ?? reader.status;
-                    
-                    return _ReaderStatusCard(
-                      deviceId: reader.deviceId,
-                      status: displayStatus,
-                      address: reader.address,
-                      rfidId: rfidId,
-                      dishName: dishName,
-                    );
-                  })
-                  .toList(),
+              children: provider.readers.map((reader) {
+                final reading = provider.getReading(reader.deviceId);
+                final rfidId = reading?.rfid ?? '';
+                final dishName =
+                    rfidId.isNotEmpty ? mealService.identifyMeal(rfidId) : null;
+
+                // Use reading status if available, fallback to reader status
+                final displayStatus = reading?.status ?? reader.status;
+
+                return _ReaderStatusCard(
+                  deviceId: reader.deviceId,
+                  status: displayStatus,
+                  address: reader.address,
+                  rfidId: rfidId,
+                  dishName: dishName,
+                );
+              }).toList(),
             ),
           ),
         ),
@@ -240,26 +238,77 @@ class SettingPage extends StatelessWidget {
   }
 
   Widget _buildPrinterSettingsColumn(BuildContext context) {
+    final dataProvider = context.watch<DataProvider>();
+
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          TextFormField(
-            initialValue: context.read<DataProvider>().printerName,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: 'Printer Name',
+          // Printer selection card
+          Card(
+            elevation: 2,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Printer Settings',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      const Icon(Icons.print, size: 20),
+                      const SizedBox(width: 8),
+                      const Text(
+                        'Selected Printer:',
+                        style: TextStyle(fontSize: 14),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          dataProvider.printerName.isEmpty
+                              ? 'No printer selected'
+                              : dataProvider.printerName,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: dataProvider.printerName.isEmpty
+                                ? Colors.red
+                                : Colors.black87,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: () => _handleSelectPrinter(context),
+                      icon: const Icon(Icons.edit),
+                      label: const Text('Select Printer'),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            onChanged: (value) {
-              context.read<DataProvider>().printerName = value;
-            },
           ),
           const SizedBox(height: 24),
           Card(
             child: SwitchListTile(
               title: const Text('Include Food Label Page'),
-              subtitle: const Text('Print nutrition report with food label information'),
+              subtitle: const Text(
+                  'Print nutrition report with food label information'),
               value: context.watch<DataProvider>().includeLabelPage,
               onChanged: (value) async {
                 context.read<DataProvider>().includeLabelPage = value;
@@ -301,6 +350,31 @@ class SettingPage extends StatelessWidget {
     );
   }
 
+  /// Handles printer selection action
+  Future<void> _handleSelectPrinter(BuildContext context) async {
+    final dataProvider = context.read<DataProvider>();
+
+    final selectedPrinterUrl = await showPrinterSelectionDialog(
+      context,
+      currentPrinterName: dataProvider.printerName,
+    );
+
+    if (selectedPrinterUrl != null) {
+      // Update the printer name in the provider
+      dataProvider.printerName = selectedPrinterUrl;
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Printer updated to: $selectedPrinterUrl'),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    }
+  }
+
   /// Handles the printing test action
   Future<void> _handlePrintingTest(BuildContext context) async {
     final dataProvider = context.read<DataProvider>();
@@ -331,8 +405,9 @@ class SettingPage extends StatelessWidget {
 
     try {
       // Check printer availability
-      final printerAvailable = await PrinterService.isPrinterAvailable(printerName);
-      
+      final printerAvailable =
+          await PrinterService.isPrinterAvailable(printerName);
+
       if (!printerAvailable) {
         if (context.mounted) {
           Navigator.of(context).pop(); // Close loading dialog
@@ -435,7 +510,7 @@ class _ReaderStatusCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool hasCard = rfidId.isNotEmpty && status == ReaderStatus.ok;
     final bool noCard = status == ReaderStatus.ok && rfidId.isEmpty;
-    
+
     return Card(
       elevation: 2,
       child: Container(
@@ -464,7 +539,7 @@ class _ReaderStatusCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 8),
-            
+
             // Status
             Text(
               status.displayName,
@@ -474,7 +549,7 @@ class _ReaderStatusCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 4),
-            
+
             // Address
             Text(
               _getShortAddress(),
@@ -484,16 +559,18 @@ class _ReaderStatusCard extends StatelessWidget {
               ),
               overflow: TextOverflow.ellipsis,
             ),
-            
+
             // Scan Results
-            if (hasCard) ..._buildCardDetectedInfo(context)
-            else if (noCard) ..._buildNoCardInfo(),
+            if (hasCard)
+              ..._buildCardDetectedInfo(context)
+            else if (noCard)
+              ..._buildNoCardInfo(),
           ],
         ),
       ),
     );
   }
-  
+
   List<Widget> _buildCardDetectedInfo(BuildContext context) {
     return [
       const SizedBox(height: 8),
@@ -544,7 +621,8 @@ class _ReaderStatusCard extends StatelessWidget {
               dishName ?? '未知料理',
               style: TextStyle(
                 fontSize: 10,
-                color: dishName != null ? Colors.green[900] : Colors.orange[900],
+                color:
+                    dishName != null ? Colors.green[900] : Colors.orange[900],
               ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
@@ -554,7 +632,7 @@ class _ReaderStatusCard extends StatelessWidget {
       ),
     ];
   }
-  
+
   List<Widget> _buildNoCardInfo() {
     return [
       const SizedBox(height: 8),
