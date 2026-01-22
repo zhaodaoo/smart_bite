@@ -999,7 +999,7 @@ class PDFGenerationService {
                         // Cache lookup result to eliminate redundant map accesses
                         final traceableData =
                             LazyLabelData.getInfo(labelInfo.traceableLabelFood);
-                        final baseText = '追溯編號：${traceableData?["trace_code"] ?? ""}\n品名：${labelInfo.traceableLabelFood}\n生產者：${traceableData?["operator"] ?? ""}\n電話：${traceableData?["phone"] ?? ""}\n地址：${traceableData?["address"] ?? ""}\n簡介：${traceableData?["description"] ?? ""}';
+                        final baseText = '追溯編號：${traceableData?["trace_code"] ?? ""}\n品名：${labelInfo.traceableLabelFood}\n生產者：${traceableData?["operator"] ?? ""}\n電話：${traceableData?["phone"] ?? ""}\n地址：${traceableData?["address"] ?? ""}';
                         final displayText = labelInfo.traceableLabelDishes.isEmpty 
                           ? baseText 
                           : '料理：${labelInfo.traceableLabelDishes}\n$baseText';
