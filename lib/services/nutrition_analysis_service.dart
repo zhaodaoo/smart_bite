@@ -365,7 +365,7 @@ class NutritionAnalysisService {
       if (proportion > 100) {
         final comment = commentsForFoodTypeByRank[key]?[Rank.tooMuch];
         return MapEntry(key, comment ?? '攝取過量');
-      } else if (proportion < 100) {
+      } else if (proportion < 10) {
         final comment = commentsForFoodTypeByRank[key]?[Rank.tooLess];
         return MapEntry(key, comment ?? '攝取不足');
       } else {
