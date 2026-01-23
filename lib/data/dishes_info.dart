@@ -1,6 +1,13 @@
+import 'package:flutter/foundation.dart';
 import 'package:smart_bite/data/constant.dart';
+import 'package:smart_bite/services/dishes_info_csv_service.dart';
 
-Map<String, Map<NutritionType, double>> dishesInfo = {
+/// Global dishes information map
+/// Can be loaded from CSV file or fallback to hardcoded data
+Map<String, Map<NutritionType, double>> dishesInfo = {};
+
+/// Hardcoded fallback data (original dishesInfo)
+Map<String, Map<NutritionType, double>> _hardcodedDishesInfo = {
   "雙薯搖滾蛋沙拉": {
     NutritionType.grains: 0.18,
     NutritionType.meat: 0.5,
@@ -1667,3 +1674,23 @@ Map<String, Map<NutritionType, double>> dishesInfo = {
     NutritionType.fiber: 0.0,
   },
 };
+
+/// Loads dishes info from CSV file
+/// Throws exception if CSV loading fails (no fallback to hardcoded data)
+Future<void> loadDishesInfoFromCsv(String csvPath) async {
+  final result = await DishesInfoCsvService.loadFromCsv(csvPath);
+  final loadedData =
+      result['dishesInfo'] as Map<String, Map<NutritionType, double>>;
+
+  dishesInfo.clear();
+  dishesInfo.addAll(loadedData);
+
+  debugPrint('✓ Loaded ${dishesInfo.length} dishes from CSV: $csvPath');
+}
+
+/// Loads dishes info from hardcoded data (fallback)
+void loadDishesInfoFromHardcoded() {
+  dishesInfo.clear();
+  dishesInfo.addAll(_hardcodedDishesInfo);
+  debugPrint('✓ Loaded ${dishesInfo.length} dishes from hardcoded data');
+}

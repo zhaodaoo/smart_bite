@@ -21,6 +21,9 @@ import '../services/data_persistence_service.dart';
 import '../services/meal_identification_service.dart';
 import '../services/pdf_generation_service.dart';
 import '../services/printer_service.dart';
+import '../data/dishes_info.dart';
+import '../data/dishes_label.dart';
+import '../data/optimized_indexes.dart';
 import 'printer_selection_dialog.dart';
 
 class SettingPage extends StatelessWidget {
@@ -351,6 +354,74 @@ class SettingPage extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
+        // CSV file path configuration card
+        Card(
+          elevation: 2,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '菜色資料檔案',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    const Icon(Icons.description, size: 24),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'CSV 檔案路徑',
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                          const SizedBox(height: 4),
+                          FutureBuilder<String>(
+                            future: DataPersistenceService.loadDishesInfoCsvPath(),
+                            builder: (context, snapshot) {
+                              final path = snapshot.data ?? '載入中...';
+                              return Text(
+                                path,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyLarge
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 2,
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  height: 48,
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () => _handleSelectCsvFile(context),
+                    icon: const Icon(Icons.edit),
+                    label: const Text('選擇 CSV 檔案'),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
         Card(
           elevation: 2,
           child: SwitchListTile(
@@ -528,6 +599,80 @@ class SettingPage extends StatelessWidget {
             duration: const Duration(seconds: 4),
           ),
         );
+      }
+    }
+  }
+
+  /// Handles CSV file selection action
+  Future<void> _handleSelectCsvFile(BuildContext context) async {
+    final currentPath = await DataPersistenceService.loadDishesInfoCsvPath();
+    
+    final selectedPath = await showDialog<String>(
+      context: context,
+      builder: (context) => _CsvPathInputDialog(currentPath: currentPath),
+    );
+
+    if (selectedPath != null && selectedPath.isNotEmpty) {
+      // Show loading dialog
+      if (context.mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => const Center(
+            child: Card(
+              child: Padding(
+                padding: EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 16),
+                    Text('正在載入 CSV 檔案...'),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
+      try {
+        // Save the path
+        await DataPersistenceService.saveDishesInfoCsvPath(selectedPath);
+        
+        // Reload dishes info and labels
+        await loadDishesInfoFromCsv(selectedPath);
+        await loadDishesLabelFromCsv(selectedPath);
+        
+        // Re-initialize optimized indexes
+        OptimizedDishesInfo.clear();
+        OptimizedDishesLabel.clear();
+        OptimizedDishesInfo.initialize();
+        OptimizedDishesLabel.initialize();
+
+        if (context.mounted) {
+          Navigator.of(context).pop(); // Close loading dialog
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('CSV 檔案已載入 ✓'),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      } catch (e) {
+        if (context.mounted) {
+          Navigator.of(context).pop(); // Close loading dialog
+          // Show error dialog instead of SnackBar
+          await showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) => _CsvErrorDialog(
+              csvPath: selectedPath,
+              error: e.toString(),
+            ),
+          );
+        }
       }
     }
   }
@@ -830,6 +975,242 @@ class _StatItem extends StatelessWidget {
           style: Theme.of(context).textTheme.bodySmall,
         ),
       ],
+    );
+  }
+}
+
+/// Dialog for inputting CSV file path
+class _CsvPathInputDialog extends StatefulWidget {
+  final String currentPath;
+
+  const _CsvPathInputDialog({required this.currentPath});
+
+  @override
+  State<_CsvPathInputDialog> createState() => _CsvPathInputDialogState();
+}
+
+class _CsvPathInputDialogState extends State<_CsvPathInputDialog> {
+  late TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.currentPath);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Row(
+        children: [
+          Icon(Icons.description, color: Colors.blue, size: 28),
+          SizedBox(width: 12),
+          Text('選擇 CSV 檔案', style: TextStyle(fontSize: 22)),
+        ],
+      ),
+      content: SizedBox(
+        width: 500,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              '請輸入 CSV 檔案的完整路徑：',
+              style: TextStyle(fontSize: 14),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _controller,
+              decoration: const InputDecoration(
+                hintText: '/path/to/dishesInfo.csv',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.folder),
+              ),
+              maxLines: 2,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '預設路徑：系統 Document 資料夾/dishesInfo.csv',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Colors.grey[600],
+                  ),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('取消', style: TextStyle(fontSize: 16)),
+        ),
+        FilledButton(
+          onPressed: () {
+            final path = _controller.text.trim();
+            if (path.isNotEmpty) {
+              Navigator.of(context).pop(path);
+            }
+          },
+          child: const Text('確認', style: TextStyle(fontSize: 16)),
+        ),
+      ],
+    );
+  }
+}
+
+/// Error dialog shown when CSV file loading fails in settings
+class _CsvErrorDialog extends StatelessWidget {
+  final String csvPath;
+  final String error;
+
+  const _CsvErrorDialog({
+    required this.csvPath,
+    required this.error,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Row(
+        children: [
+          Icon(Icons.error_outline, color: Colors.red[700], size: 28),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              'CSV 檔案載入失敗',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: Colors.red[700],
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+          ),
+        ],
+      ),
+      content: SizedBox(
+        width: 500,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '無法載入指定的 CSV 檔案，請檢查以下項目：',
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.grey[300]!),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '檔案路徑：',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                    const SizedBox(height: 4),
+                    SelectableText(
+                      csvPath,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontFamily: 'monospace',
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.orange[50],
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.orange[200]!),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.info_outline, color: Colors.orange[700], size: 20),
+                        const SizedBox(width: 8),
+                        Text(
+                          '錯誤訊息：',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.orange[900],
+                              ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    SelectableText(
+                      error,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            fontFamily: 'monospace',
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                '請確認：',
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+              const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.only(left: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildCheckItem(context, 'CSV 檔案是否存在於指定路徑'),
+                    _buildCheckItem(context, '檔案格式是否正確（UTF-8 編碼）'),
+                    _buildCheckItem(context, '檔案是否包含正確的表頭和資料列'),
+                    _buildCheckItem(context, '檔案權限是否允許讀取'),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        FilledButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('確定', style: TextStyle(fontSize: 16)),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCheckItem(BuildContext context, String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          Icon(Icons.check_circle_outline, size: 20, color: Colors.grey[600]),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

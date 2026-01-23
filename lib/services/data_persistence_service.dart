@@ -187,6 +187,60 @@ class DataPersistenceService {
     final path = await _getLocalPath();
     return File('$path/printer_name.txt');
   }
+
+  /// Saves the dishes info CSV file path preference.
+  ///
+  /// Throws [DataPersistenceException] if save fails.
+  static Future<void> saveDishesInfoCsvPath(String csvPath) async {
+    try {
+      final file = await _getDishesInfoCsvPathFile();
+      await file.writeAsString(csvPath);
+      debugPrint('✓ Dishes info CSV path preference saved: $csvPath');
+    } catch (e) {
+      debugPrint('❌ Error saving dishes info CSV path preference: $e');
+      throw DataPersistenceException(
+          'Failed to save dishes info CSV path preference: ${e.toString()}');
+    }
+  }
+
+  /// Loads the dishes info CSV file path preference.
+  ///
+  /// Returns default path (Document directory/dishesInfo.csv) if file doesn't exist or is empty.
+  static Future<String> loadDishesInfoCsvPath() async {
+    try {
+      final file = await _getDishesInfoCsvPathFile();
+      if (await file.exists()) {
+        final content = await file.readAsString();
+        final csvPath = content.trim();
+        if (csvPath.isNotEmpty) {
+          debugPrint('✓ Dishes info CSV path preference loaded: $csvPath');
+          return csvPath;
+        }
+      }
+      // Default: Document directory/dishesInfo.csv
+      final defaultPath = await _getDefaultDishesInfoCsvPath();
+      debugPrint(
+          'ℹ Dishes info CSV path preference file not found, using default: $defaultPath');
+      return defaultPath;
+    } catch (e) {
+      debugPrint(
+          '❌ Error loading dishes info CSV path preference: $e, using default');
+      final defaultPath = await _getDefaultDishesInfoCsvPath();
+      return defaultPath; // Default on error
+    }
+  }
+
+  /// Gets the default CSV file path (Document directory/dishesInfo.csv)
+  static Future<String> _getDefaultDishesInfoCsvPath() async {
+    final path = await _getLocalPath();
+    return '$path/dishesInfo.csv';
+  }
+
+  /// Gets the file for storing dishes info CSV path.
+  static Future<File> _getDishesInfoCsvPathFile() async {
+    final path = await _getLocalPath();
+    return File('$path/dishes_info_csv_path.txt');
+  }
 }
 
 /// Exception thrown when data persistence operations fail.

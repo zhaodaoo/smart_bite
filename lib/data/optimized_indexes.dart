@@ -4,9 +4,11 @@
 /// Initialized at app startup to convert raw data maps into indexed structures.
 library;
 
+import 'package:flutter/foundation.dart';
 import 'package:smart_bite/data/constant.dart';
 import 'package:smart_bite/data/dishes_info.dart';
 import 'package:smart_bite/data/dishes_label.dart';
+import 'package:smart_bite/services/data_persistence_service.dart';
 
 /// Debug flag to disable caching for testing
 /// Set via environment variable: DISABLE_CACHE=true
@@ -184,7 +186,17 @@ class OptimizedDishesLabel {
 
 /// Initialize all optimized indexes
 /// Call this at app startup before running the app
+/// Loads dishes info from CSV file - throws exception if loading fails
 Future<void> initializeOptimizedIndexes() async {
+  // Load CSV path from preferences
+  final csvPath = await DataPersistenceService.loadDishesInfoCsvPath();
+  
+  // Load from CSV (throws exception if fails)
+  await loadDishesInfoFromCsv(csvPath);
+  await loadDishesLabelFromCsv(csvPath);
+  debugPrint('✓ Successfully loaded dishes info from CSV');
+  
+  // Initialize optimized indexes with loaded data
   OptimizedDishesInfo.initialize();
   OptimizedDishesLabel.initialize();
 }

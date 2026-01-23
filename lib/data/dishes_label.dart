@@ -1,6 +1,13 @@
+import 'package:flutter/foundation.dart';
 import 'package:smart_bite/data/constant.dart';
+import 'package:smart_bite/services/dishes_info_csv_service.dart';
 
-Map<String, Map<Label, String>> dishesLabel = {
+/// Global dishes label map
+/// Can be loaded from CSV file or fallback to hardcoded data
+Map<String, Map<Label, String>> dishesLabel = {};
+
+/// Hardcoded fallback data (original dishesLabel)
+Map<String, Map<Label, String>> _hardcodedDishesLabel = {
   "雙薯搖滾蛋沙拉": {Label.type: '產銷履歷農產品', Label.food: '甘藷（地瓜）'},
   "鮮菇莧菜": {Label.type: '有機農產品', Label.food: '莧菜(含綠莧、白莧、紅莧)'},
   "葡萄": {Label.type: '溯源農糧產品', Label.food: '葡萄'},
@@ -113,3 +120,22 @@ Map<String, Map<Label, String>> dishesLabel = {
   "ABC通心粉湯": {Label.type: '產銷履歷農產品', Label.food: '高麗菜'},
   "優格": {Label.type: '無', Label.food: '優格'},
 };
+
+/// Loads dishes label from CSV file
+/// Throws exception if CSV loading fails (no fallback to hardcoded data)
+Future<void> loadDishesLabelFromCsv(String csvPath) async {
+  final result = await DishesInfoCsvService.loadFromCsv(csvPath);
+  final loadedData = result['dishesLabel'] as Map<String, Map<Label, String>>;
+  
+  dishesLabel.clear();
+  dishesLabel.addAll(loadedData);
+  
+  debugPrint('✓ Loaded ${dishesLabel.length} labels from CSV: $csvPath');
+}
+
+/// Loads dishes label from hardcoded data (fallback)
+void loadDishesLabelFromHardcoded() {
+  dishesLabel.clear();
+  dishesLabel.addAll(_hardcodedDishesLabel);
+  debugPrint('✓ Loaded ${dishesLabel.length} labels from hardcoded data');
+}

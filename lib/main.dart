@@ -8,6 +8,7 @@ import 'package:smart_bite/data/optimized_indexes.dart';
 import 'package:smart_bite/provider/data_provider.dart';
 import 'package:smart_bite/provider/rfid_reader_provider.dart';
 import 'package:smart_bite/screens/input_screen.dart';
+import 'package:smart_bite/services/data_persistence_service.dart';
 import 'package:smart_bite/utils/platform_detector.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -17,7 +18,13 @@ Future<void> main() async {
   // Pre-load critical data for optimal performance
   // Initialize optimized indexes for dishes and nutrition data
   // This improves RFID scanning and nutrition analysis performance by 40-50%
-  await initializeOptimizedIndexes();
+  String? csvError;
+  try {
+    await initializeOptimizedIndexes();
+  } catch (e) {
+    csvError = e.toString();
+    debugPrint('❌ CSV loading failed: $csvError');
+  }
 
   // Pre-load PDF background images to fix first print job missing background bug
   await _preloadPDFAssets();
@@ -39,7 +46,9 @@ Future<void> main() async {
     await windowManager.show();
     await windowManager.setSkipTaskbar(false);
   });
-  runApp(const MyApp());
+  
+  // Run app with error handling
+  runApp(MyApp(csvError: csvError));
 }
 
 /// Preloads PDF background images at app startup to prevent missing background
@@ -107,10 +116,26 @@ Future<void> _preloadPDFAssets() async {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final String? csvError;
+
+  const MyApp({super.key, this.csvError});
 
   @override
   Widget build(BuildContext context) {
+    // If CSV loading failed, show error screen
+    if (csvError != null) {
+      return MaterialApp(
+        title: 'Smart Bite!',
+        theme: ThemeData(
+          fontFamily: 'NotoSansCJK',
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.brown),
+          useMaterial3: true,
+        ),
+        home: _CsvErrorScreen(error: csvError!),
+      );
+    }
+
+    // Normal app flow
     // Detect platform and create appropriate RFID reader manager
     // Use environment variable RFID_MODE to override: 'gpio' or 'mock'
     final rfidMode = Platform.environment['RFID_MODE'];
@@ -144,6 +169,181 @@ class MyApp extends StatelessWidget {
           useMaterial3: true,
         ),
         home: const InputScreen(),
+      ),
+    );
+  }
+}
+
+/// Error screen shown when CSV file loading fails
+class _CsvErrorScreen extends StatelessWidget {
+  final String error;
+
+  const _CsvErrorScreen({required this.error});
+
+  Future<String> _getCsvPath() async {
+    try {
+      return await DataPersistenceService.loadDishesInfoCsvPath();
+    } catch (e) {
+      return '無法取得路徑';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.red[50],
+      body: Center(
+        child: Card(
+          margin: const EdgeInsets.all(32),
+          elevation: 8,
+          child: Padding(
+            padding: const EdgeInsets.all(32.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.error_outline, color: Colors.red[700], size: 48),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Text(
+                        'CSV 檔案載入失敗',
+                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                              color: Colors.red[700],
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  '無法載入菜色資料檔案，請檢查以下項目：',
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+                const SizedBox(height: 16),
+                FutureBuilder<String>(
+                  future: _getCsvPath(),
+                  builder: (context, snapshot) {
+                    final csvPath = snapshot.data ?? '載入中...';
+                    return Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[100],
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.grey[300]!),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '預期檔案路徑：',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                          ),
+                          const SizedBox(height: 4),
+                          SelectableText(
+                            csvPath,
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  fontFamily: 'monospace',
+                                ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.orange[50],
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.orange[200]!),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.info_outline, color: Colors.orange[700], size: 20),
+                          const SizedBox(width: 8),
+                          Text(
+                            '錯誤訊息：',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.orange[900],
+                                ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      SelectableText(
+                        error,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              fontFamily: 'monospace',
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  '請確認：',
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                const SizedBox(height: 8),
+                Padding(
+                  padding: const EdgeInsets.only(left: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildCheckItem(context, 'CSV 檔案是否存在於指定路徑'),
+                      _buildCheckItem(context, '檔案格式是否正確（UTF-8 編碼）'),
+                      _buildCheckItem(context, '檔案是否包含正確的表頭和資料列'),
+                      _buildCheckItem(context, '檔案權限是否允許讀取'),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 32),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: () => exit(0),
+                    icon: const Icon(Icons.close),
+                    label: const Text('關閉程式'),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: Colors.red[700],
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCheckItem(BuildContext context, String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          Icon(Icons.check_circle_outline, size: 20, color: Colors.grey[600]),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ),
+        ],
       ),
     );
   }
