@@ -21,7 +21,8 @@ class NutritionAnalysisService {
     try {
       // Log empty order scenario for analytics (acceptable behavior)
       if (orderNames.isEmpty) {
-        debugPrint('⚠️  Analysis requested with zero meals - proceeding with nutritional needs calculation only');
+        debugPrint(
+            '⚠️  Analysis requested with zero meals - proceeding with nutritional needs calculation only');
       }
 
       // Intake meal labels and foods
@@ -167,8 +168,7 @@ class NutritionAnalysisService {
     // Handle empty orders - return zero nutrition (user didn't order)
     if (orderNames.isEmpty) {
       return Map.fromEntries(
-        NutritionType.values.map((type) => MapEntry(type, 0.0))
-      );
+          NutritionType.values.map((type) => MapEntry(type, 0.0)));
     }
 
     // Use optimized index for O(1) lookup instead of sequential map access
@@ -382,7 +382,7 @@ class NutritionAnalysisService {
       final proportion = intakeFoodTypeDailyProportion[key] ?? 0;
       if (proportion > 100) {
         return MapEntry(key, getRankLabel(Rank.tooMuch));
-      } else if (proportion < 100) {
+      } else if (proportion < 10) {
         return MapEntry(key, getRankLabel(Rank.tooLess));
       } else {
         return MapEntry(key, getRankLabel(Rank.good));
